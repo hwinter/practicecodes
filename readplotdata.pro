@@ -33,7 +33,7 @@ gg = [  0, 255,   0,      255,  0,      255,  0,     255, 125]
 bb = [  0, 255,   0,      0,      255,  0,      255, 255,  0]
 ; Lastly, we load the new color table
 tvlct, rr, gg, bb
-;read the ascii files into vectors
+;read the ascii files into vectors V1 and V2 with a for data1 b for data 2 c for data 3
 readcol, data1, aV1, aV2, comment = 'E', format = 'F,F', skipline = 2
 plotdata1 = [[aV1],[aV2]]
 readcol, data2, bV1, bV2, comment = 'E', format = 'F,F', skipline = 2
