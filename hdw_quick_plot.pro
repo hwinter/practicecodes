@@ -6,7 +6,8 @@ pro hdw_quick_plot, output
 ;
 ;Inputs:None
 ;
-;Outputs: three files plota.data, plotb.data, plotc.data and returns y
+;Outputs: three files plota.data, plotb.data, plotc.data and returns
+;output which is 3X100 double array of the y coordinate data
 ;
 ;
 ;Example: hdw_quick_plot, outy
