@@ -1,5 +1,19 @@
 pro hdw_quick_plot, output
-
+;
+;Name: hdw_quick_plot
+;
+;Purpose: creates three dummy data files in two column format
+;
+;Inputs:None
+;
+;Outputs: three files plota.data, plotb.data, plotc.data and returns y
+;
+;
+;Example: hdw_quick_plot, outy
+;
+;Edited: by Daniel Herman, 6/18/14, daniel.herman@cfa.harvard.edu
+;
+; 
 n_points=100
 
 X = 2*!PI/(n_points-1) * FINDGEN(n_points)
@@ -24,8 +38,6 @@ for i=0ul, n_elements(file)-1 do begin
    endfor
    printf, lun, 'EOF'
    free_lun,lun
-
 endfor
-output = lun
-
+output = y
 end
