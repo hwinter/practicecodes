@@ -33,7 +33,7 @@ def tableread2(filename1,filename2,filename3,savename):
     plt.title('Super Awesome Graph!')
     plt.ylabel('Flux')
     plt.xlabel('Time')
-    pylab.ylim([-1.5,4.5])
+    pylab.ylim([-5,5])
     pylab.xlim([0,6.3])
     plt.savefig(savename)
     #create return variable
