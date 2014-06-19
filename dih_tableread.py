@@ -19,8 +19,8 @@ import matplotlib.cm as cm
 
 #helper fct grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
-    cts = np.genfromtxt(filename, skip_header=2, skip_footer=1)
-    return zip(*cts)
+    grabbedcol = np.genfromtxt(filename, skip_header=2, skip_footer=1)
+    return zip(*grabbedcol)
 
 #helper fct removes files from directory and grabs columns of data
 def dih_tablereader(dirname):
