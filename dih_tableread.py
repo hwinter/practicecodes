@@ -47,7 +47,10 @@ def dih_tablereader(dirname):
 #Written:6/19/14 Daniel Herman, daniel.herman@cfa.harvard.edu
 #
 #
-
+#Purpose:plots the first number = (numplot) files in directory = (dirname) filled with ascii files and places marker on peak data point for each plot saves plot as savename
+#
+#Inputs:dirname-- directory name, savename-- plot file saved as postscript with this name, numplot-- number of files from directory to be plotted
+#
 def dih_plotter(dirname,savename,numplot):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
@@ -70,22 +73,7 @@ def dih_plotter(dirname,savename,numplot):
 
     
     
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 
 if __name__ == "__main__": 
