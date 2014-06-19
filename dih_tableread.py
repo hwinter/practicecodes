@@ -15,6 +15,7 @@ matplotlib.use('ps')
 import matplotlib.pyplot as plt 
 import pylab
 import glob
+import matplotlib.cm as cm
 
 #grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
@@ -54,12 +55,13 @@ def dih_tablereader(dirname):
 def dih_plotter(dirname,savename,numplot):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
+    colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist))))
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
         peak = max(y)
         peaklist = [i for i, j in enumerate(y) if j==peak] #list of indices of peak points
-        plt.plot(x,y,'b')
+        plt.plot(x,y,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
 #finish up plot characteristics
