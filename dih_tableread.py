@@ -22,17 +22,19 @@ def dih_filegrab(filename):
     return zip(*cts)
 
 #removes files from directory and grabs columns of data
-def dih_tablereader(dirname,savename):
+def dih_tablereader(dirname):
     filelist = glob.glob(dirname+"/*.data")
     openlist = []
     for filename in filelist:
         filecontent = dih_filegrab(filename)
         openlist.append(filecontent)
+    print filelist
     return openlist
-
-#plots the first number = (numplot) files in directory = (dirname) filled with ascii files
-#and places marker on peak data point for each plot
-#saves plot as savename
+#Name:dih_plotter
+#
+#Purpose:plots the first number = (numplot) files in directory = (dirname) filled with ascii files and places marker on peak data point for each plot saves plot as savename
+#
+#Inputs:dirname-- directory name, savename-- plot file saved as postscript with this name, numplot-- number of files from directory to be plotted
 def dih_plotter(dirname,savename,numplot):
     inlist = dih_tablereader(dirname,savename)
     plotlist = inlist[0:numplot]
