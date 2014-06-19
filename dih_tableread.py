@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import pylab
 import glob
 import matplotlib.cm as cm
+from scipy import signal
+
+
 
 #helper fct grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
@@ -59,11 +62,14 @@ def dih_plotter(dirname,savename,numplot):
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        peak = max(y)
-        peaklist = [i for i, j in enumerate(y) if j==peak] #list of indices of peak points
+        peaklist =signal.find_peaks_cwt(y, np.arange(20,50))
         plt.plot(x,y,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
+        peak = max(y)
+        peaklist2 = [i for i, j in enumerate(y) if j==peak]
+        for num in peaklist2:
+            plt.plot(x[num],y[num],'rD')
 #finish up plot characteristics
     plt.title('Super Most Awesome Graph!')
     plt.ylabel('Flux')
