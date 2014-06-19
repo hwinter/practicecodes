@@ -36,7 +36,7 @@ def dih_tablereader(dirname):
 #
 #Inputs:dirname-- directory name, savename-- plot file saved as postscript with this name, numplot-- number of files from directory to be plotted
 def dih_plotter(dirname,savename,numplot):
-    inlist = dih_tablereader(dirname,savename)
+    inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
