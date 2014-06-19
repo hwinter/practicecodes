@@ -17,12 +17,12 @@ import pylab
 import glob
 import matplotlib.cm as cm
 
-#grabs columns of data from ascii files and returns x and y columns
+#helper fct grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
     cts = np.genfromtxt(filename, skip_header=2, skip_footer=1)
     return zip(*cts)
 
-#removes files from directory and grabs columns of data
+#helper fct removes files from directory and grabs columns of data
 def dih_tablereader(dirname):
     filelist = glob.glob(dirname+"/*.data")
     openlist = []
@@ -55,7 +55,7 @@ def dih_tablereader(dirname):
 def dih_plotter(dirname,savename,numplot):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
-    colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist))))
+    colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
@@ -70,13 +70,13 @@ def dih_plotter(dirname,savename,numplot):
     plt.xlabel('Time')       
     pylab.ylim([-5,5])
     pylab.xlim([0,6.3])
-    plt.savefig(savename)
+    plt.savefig(savename)#saves postscript file
     return plotlist
 
     
     
     
-
+#parsing code
 
 if __name__ == "__main__": 
     
