@@ -71,7 +71,7 @@ def dih_plotter(dirname,savename,numplot):
         peaklist2 = [i for i, j in enumerate(y) if j==peak]
     	for num in peaklist2:
         	plt.plot(x[num],y[num],'rD')
-			plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
+		plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
 #finish up plot characteristics
 
     plt.title('Super Most Awesome Graph!')
