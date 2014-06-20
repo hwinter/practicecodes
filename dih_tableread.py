@@ -70,7 +70,9 @@ def dih_plotter(dirname,savename,numplot):
         peaklist2 = [i for i, j in enumerate(y) if j==peak]
         for num in peaklist2:
             plt.plot(x[num],y[num],'rD')
-    #finish up plot characteristics
+
+#finish up plot characteristics
+
     plt.title('Super Most Awesome Graph!')
     plt.ylabel('Flux')
     plt.xlabel('Time')       
@@ -79,6 +81,10 @@ def dih_plotter(dirname,savename,numplot):
     plt.savefig(savename)#saves postscript file
     return plotlist
 
+
+    
+    
+    
 
 
 
