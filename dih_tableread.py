@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 import pylab
 import glob
 import matplotlib.cm as cm
-import scipy
 from scipy import signal
 
 
@@ -35,8 +34,6 @@ def dih_tablereader(dirname):
         openlist.append(filecontent)
     print filelist
     return openlist
-
-
 #Name:dih_plotter
 #
 #Purpose:plots the first number = (numplot) files in directory = (dirname) filled with 
