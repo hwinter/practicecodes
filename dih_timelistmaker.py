@@ -17,10 +17,18 @@ import dih_tableread as d
 def dih_timelistmaker(dirname):
 	indata = d.dih_tablereader(dirname)
 	timelist =[]
+	endlist =[]
 	for memberlist in indata:
 		y = memberlist[1]
 		peak = max(y)
 		peaklist = [i for i, j in enumerate(y) if j==peak]
 		timelist.append(peaklist)
-	return timelist
+	for member in timelist:
+		for item in member:
+			endlist.append(item)
+	
+	
+	
+	
+	return endlist
 		
