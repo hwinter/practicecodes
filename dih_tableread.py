@@ -66,11 +66,12 @@ def dih_plotter(dirname,savename,numplot):
         plt.plot(x,y,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
+            plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
         peak = max(y)
         peaklist2 = [i for i, j in enumerate(y) if j==peak]
         for num in peaklist2:
             plt.plot(x[num],y[num],'rD')
-
+			plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
 #finish up plot characteristics
 
     plt.title('Super Most Awesome Graph!')
