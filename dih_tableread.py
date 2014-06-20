@@ -64,7 +64,6 @@ def dih_plotter(dirname,savename,numplot):
         y = memberlist[1] #y coordinate data
         peaklist =signal.find_peaks_cwt(y, np.arange(20,50))
         plt.plot(x,y,color = next(colors))
-        plt.errorbar(x,y,xerr = 0.0,yerr = 0.2)
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
         peak = max(y)
