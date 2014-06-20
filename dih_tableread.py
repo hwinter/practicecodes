@@ -63,7 +63,7 @@ def dih_plotter(dirname,savename,numplot):
     for idx,memberlist in enumerate(plotlist):
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        peaklist =signal.find_peaks_cwt(y, np.arange(1,25))
+        peaklist =signal.find_peaks_cwt(y, np.arange(1,30))
         plt.plot(x,y,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
