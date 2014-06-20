@@ -1,16 +1,16 @@
-pro dih_quick_plot, nfiles, savestring, output
+pro dih_quick_plot, nfiles, savestring, dirname, output
 ;
 ;Name: dih_quick_plot
 ;
 ;Purpose: creates many dummy data files in two column format
 ;
 ;Inputs: number of files to create (=nfiles), archtype of files to be
-;created (=savestring)
+;created (=savestring), new directory to put files in (=dirname)
 ;
 ;Outputs: a certain number of dummy data files named savestring#.data
 ;
 ;
-;Example:dih_quick_plot,10, outy 
+;Example:dih_quick_plot,10, 'dummydata','dirdata' outy 
 ;
 ;Edited: by Daniel Herman, 6/18/14, daniel.herman@cfa.harvard.edu
 ;
@@ -44,7 +44,7 @@ for mmm=0ul, nfiles-1 do begin
    file[mmm] = savestring+strtrim(mmm+1,2)+'.data'
 endfor
 
-
+file_mkdir, dirname
 ;populates file array with data from x and y arrays and gives each
 ;file a header and footer
 for iii=0ul, n_elements(file)-1 do begin
@@ -56,6 +56,8 @@ for iii=0ul, n_elements(file)-1 do begin
    endfor
    printf, lun, 'EOF'
    free_lun,lun
+   file_move, file[iii], dirname
 endfor
+
 output = ynoise
 end
