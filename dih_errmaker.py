@@ -12,9 +12,7 @@ import pylab as P
 import glob
 import matplotlib.cm as cm
 import dih_tableread as d
-import dih_maxlistmaker as dmax
-import dih_minlistmaker as dmin
-from matplotlib.mlab import find
+
 
 
 def dih_errmaker(dirname):
@@ -23,11 +21,13 @@ def dih_errmaker(dirname):
 	for member in indata:
 		y = member[1]
 		diff = abs(max(y)-min(y))
-		if diff > .8:
-			err = 6.3/7
+		if diff > 2.0:
+			err = 6.3/11
+		elif diff < 1.0:
+			err = 6.3/5
 		else:
-			err = 6.3/3
-	endlist.append(err)
+			err = 6.3/9
+		endlist.append(err)
 	return endlist
 		
 		
