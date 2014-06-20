@@ -69,8 +69,8 @@ def dih_plotter(dirname,savename,numplot):
             plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
         peak = max(y)
         peaklist2 = [i for i, j in enumerate(y) if j==peak]
-        for num in peaklist2:
-            plt.plot(x[num],y[num],'rD')
+    	for num in peaklist2:
+        	plt.plot(x[num],y[num],'rD')
 			plt.errorbar(x[num],y[num],xerr=0,yerr=0.15)
 #finish up plot characteristics
 
