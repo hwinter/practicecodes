@@ -21,7 +21,7 @@ def dih_errmaker(dirname):
 	indata = d.dih_tablereader(dirname)
 	endlist =[]
 	for member in indata:
-		y = memberlist[1]
+		y = member[1]
 		diff = abs(max(y)-min(y))
 		if diff > .8:
 			err = 6.3/7
