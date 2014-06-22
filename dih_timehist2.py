@@ -2,7 +2,12 @@
 #
 #Purpose: creates histogram of times (indices) of peak events
 #
+#Inputs: directory of input files (dirname) and save name for hist plot (histname)
 #
+#
+#
+#
+#Written:6/22/14 Dan Herman daniel.herman@cfa.harvard.edu
 import sys
 import numpy as np
 import matplotlib
@@ -17,12 +22,12 @@ import dih_tableread as d
 import dih_timelistmaker as tlm
 from scipy.stats import norm
 
-def dih_basictimehist(dirname,histname):
+def dih_timehist2(dirname,histname):
     indata = tlm.dih_timelistmaker(dirname)
-    y, binedges = np.histogram(indata,bins=10)
-    bincenters = .5*(binedges[1:]+binedges[:-1])
+    y, binedges = np.histogram(indata,bins=10)#create hist data
+    bincenters = .5*(binedges[1:]+binedges[:-1])#create bin centers
     width = 3
-    list1 = [i for i, j in enumerate(y) if j != 0.0]
+    list1 = [i for i, j in enumerate(y) if j != 0.0]#find indices of non zero bin values
     list2 = [0]*len(y)
     for num in list1:
         list2[num] = .5
@@ -30,6 +35,7 @@ def dih_basictimehist(dirname,histname):
     plt.xlabel("Time of Peak")
     plt.ylabel("# of peaks")
     plt.title("Time Distribution of Peaks")
+#gaussian fitting
     (mu,sigma) = norm.fit(indata)
     plotline = mlab.normpdf(bincenters,mu,sigma)
     plt.plot(bincenters,plotline,'b--')
