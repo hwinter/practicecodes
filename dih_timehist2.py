@@ -55,4 +55,6 @@ def dih_timehist2(dirname,histname):
     #plt.plot(bincenters,hist_fit)
     plt.plot(bincenters,plotline)
     plt.savefig(histname)
-    return indata
+    residuals = plotline - y
+    weighted = sp.sqrt(residuals**2/2.0**2)
+    return weighted
