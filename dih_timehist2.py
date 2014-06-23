@@ -4,8 +4,10 @@
 #
 #Inputs: directory of input files (dirname) and save name for hist plot (histname)
 #
+#Outputs: chisquared value for fit of gaussian to event times as well as the corresponding 
+# plot
 #
-#
+#Example: chi = dih.dih_timehist2('../data','hist.ps')
 #
 #Written:6/22/14 Dan Herman daniel.herman@cfa.harvard.edu
 import sys
