@@ -4,7 +4,14 @@
 #
 #Inputs: array x and index beta
 #
+#Outputs: smoothed array
 #
+#Example: y = dih_smooth(y,16)
+#
+#Written: 6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
 import sys
 import numpy as np
 import matplotlib
@@ -33,8 +40,15 @@ def dih_smooth(x,beta):
 #
 #Purpose:attempt at using kaiser smoothed data to find peaks and plot them
 #
-#See dih_tableread for more documentation
-
+#Inputs: directory string, savename string, number of files to read from directory
+#
+#Outputs: plot of smoothed data from dirname, returns raw data
+#
+#Example: gah = dih_plotter2('../data','savename.ps',10)
+#
+#Written:6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
 def dih_plotter2(dirname,savename,numplot):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
