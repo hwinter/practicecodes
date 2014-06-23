@@ -2,7 +2,11 @@
 #
 #Purpose: makes list of times (indices) of peak event
 #
+#Inputs:directory name string
 #
+#Outputs: list of times of peak events
+#
+#Example:
 import sys
 import numpy as np
 import matplotlib
