@@ -24,6 +24,7 @@ import dih_timelistmaker as tlm
 from scipy.stats import norm
 from scipy.optimize import curve_fit
 
+# define gaussian test function
 def gauss(x,*p):
 	A,mu,sigma = p
 	return A*np.exp(-(x-mu)**2/(2.*sigma**2))
@@ -42,20 +43,22 @@ def dih_timehist2(dirname,histname):
     width = 3
     list1 = [i for i, j in enumerate(y) if j != 0.0]#find indices of non zero bin values
     list2 = [0]*len(y)
-    for num in list1:
+    for num in list1:#populate error list
         list2[num] = 2.0
-    plt.bar(bincenters,y,width=width, color ='r',yerr=list2)
+    plt.bar(bincenters,y,width=width, color ='r',yerr=list2)#create bar plot with errors
     plt.xlabel("Time of Peak")
     plt.ylabel("# of peaks")
     plt.title("Time Distribution of Peaks")
-    (mu,sigma) = norm.fit(indata)
-    plotline = mlab.normpdf(bincenters,mu,sigma)
+    (mu,sigma) = norm.fit(indata)#gaussian fitting raw data
+    plotline = mlab.normpdf(bincenters,mu,sigma)#creates the gaussian
+    #alternative method for fitting
     #p0 = [1.,0.,1.]
     #coeff,var_matrix = curve_fit(gauss,bincenters,y,p0=p0)
     #hist_fit = gauss(bincenters, *coeff)
     #plt.plot(bincenters,hist_fit)
     plt.plot(bincenters,plotline)
     plt.savefig(histname)
+    #create chi squared value
     residuals = plotline - y
     weighted = sp.sqrt(residuals**2/2.0**2)
     return sum(weighted)
