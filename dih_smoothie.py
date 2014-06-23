@@ -56,7 +56,7 @@ def dih_plotter2(dirname,savename,numplot):
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        ysmooth = dih_smooth(y,16)
+        ysmooth = dih_smooth(y,14)
         peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,30))#continuous wavelet transformation
         plt.plot(x,ysmooth,color = next(colors))
         for num in peaklist:
