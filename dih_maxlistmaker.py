@@ -1,6 +1,14 @@
 #Name: dih_maxlistmaker.py
 #
-#Purpose: makes list of times (indices) of peak event
+#Purpose: makes list of times (indices) of first peak event
+#
+#Inputs: directory containing data
+#
+#Outputs: list of times of first peak event
+#
+#Example: peaks = dih_maxlistmaker('../data')
+#
+#Written:6/19/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
 import sys
@@ -14,7 +22,7 @@ import matplotlib.cm as cm
 from scipy import signal
 import dih_tableread as d
 
-def dih_timelistmaker(dirname):
+def dih_maxlistmaker(dirname):
 	indata = d.dih_tablereader(dirname)
 	timelist =[]
 	endlist =[]
