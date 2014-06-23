@@ -15,6 +15,7 @@ matplotlib.use('ps')
 import matplotlib.pyplot as plt 
 import pylab as P
 import glob
+import scipy as sp
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 from scipy import signal
@@ -57,4 +58,4 @@ def dih_timehist2(dirname,histname):
     plt.savefig(histname)
     residuals = plotline - y
     weighted = sp.sqrt(residuals**2/2.0**2)
-    return weighted
+    return sum(weighted)
