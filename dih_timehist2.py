@@ -21,6 +21,18 @@ from scipy import signal
 import dih_tableread as d
 import dih_timelistmaker as tlm
 from scipy.stats import norm
+from scipy.optimize import curve_fit
+
+def gauss(x,*p):
+	A,mu,sigma = p
+	return A*np.exp(-(x-mu)**2/(2.*sigma**2))
+
+
+
+
+
+
+
 
 def dih_timehist2(dirname,histname):
     indata = tlm.dih_timelistmaker(dirname)
@@ -30,14 +42,17 @@ def dih_timehist2(dirname,histname):
     list1 = [i for i, j in enumerate(y) if j != 0.0]#find indices of non zero bin values
     list2 = [0]*len(y)
     for num in list1:
-        list2[num] = .5
+        list2[num] = 2.0
     plt.bar(bincenters,y,width=width, color ='r',yerr=list2)
     plt.xlabel("Time of Peak")
     plt.ylabel("# of peaks")
     plt.title("Time Distribution of Peaks")
-#gaussian fitting
     (mu,sigma) = norm.fit(indata)
     plotline = mlab.normpdf(bincenters,mu,sigma)
-    plt.plot(bincenters,plotline,'b--')
+    #p0 = [1.,0.,1.]
+    #coeff,var_matrix = curve_fit(gauss,bincenters,y,p0=p0)
+    #hist_fit = gauss(bincenters, *coeff)
+    #plt.plot(bincenters,hist_fit)
+    plt.plot(bincenters,plotline)
     plt.savefig(histname)
-    return list1
+    return indata
