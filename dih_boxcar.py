@@ -13,19 +13,22 @@ from scipy import signal
 #
 #Name: dih_boxcar
 #
-#Purpose: convolves boxcar window with inarray to produce smoother plot
+#Purpose: convolves boxcar window with vector x to produce smoother plot
 #
-#Inputs: input 1d array and width of boxcar window
+#Inputs: input 1d array
 #
 #Outputs:Smoothed array of length = original length minus 2 (for useful case of width 3)
 #
-#Example: xsmooth = dih_boxcar(x,3)
+#Example: xsmooth = dih_boxcar(x)
 #
 #Written:6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_boxcar(inarray,width):
-	return np.convolve(inarray, np.ones((width,))/width,mode='valid')[(width-1):]
+def dih_boxcar(x):
+	width = 3
+	s = np.r_[x[width-1:0:-1],x,x[-1:-width:-1]]
+	out = np.convolve(inarray, np.ones((width,))/width,mode='valid')
+	return out[1:len(out)-1]
 	
 #Name: dih_plotter3
 #
@@ -42,7 +45,7 @@ def dih_plotter3(dirname,savename,numplot):
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        ysmooth = dih_boxcar(y,3)
+        ysmooth = dih_boxcar(y)
         xshort = x[0:len(ysmooth)]
         peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,30))#continuous wavelet transformation
         plt.plot(xshort,ysmooth,color = next(colors))
