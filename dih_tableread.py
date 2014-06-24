@@ -17,8 +17,7 @@ import pylab
 import glob
 import matplotlib.cm as cm
 from scipy import signal
-
-
+import dih_errmaker as d
 
 #helper fct grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
@@ -59,18 +58,16 @@ def dih_plotter(dirname,savename,numplot):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
     colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
-    for memberlist in plotlist:
+    errlist = d.dih_errmaker(dirname)
+    print errlist
+    for idx,memberlist in enumerate(plotlist):
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        peaklist =signal.find_peaks_cwt(y, np.arange(20,50))
+        peaklist =signal.find_peaks_cwt(y, np.arange(1,30))
         plt.plot(x,y,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],y[num],'gD')#places markers on peaks
-        peak = max(y)
-        peaklist2 = [i for i, j in enumerate(y) if j==peak]
-        for num in peaklist2:
-            plt.plot(x[num],y[num],'rD')
-
+            plt.errorbar(x[num],y[num],xerr=errlist[idx],yerr=0.15,ecolor = 'b')
 #finish up plot characteristics
 
     plt.title('Super Most Awesome Graph!')
