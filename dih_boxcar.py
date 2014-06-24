@@ -27,7 +27,7 @@ from scipy import signal
 def dih_boxcar(x):
 	width = 3
 	s = np.r_[x[width-1:0:-1],x,x[-1:-width:-1]]
-	out = np.convolve(inarray, np.ones((width,))/width,mode='valid')
+	out = np.convolve(s, np.ones((width,))/width,mode='valid')
 	return out[1:len(out)-1]
 	
 #Name: dih_plotter3
