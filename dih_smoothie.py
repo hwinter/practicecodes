@@ -31,8 +31,8 @@ def dih_smooth(x,beta):
     # extending the data at beginning and at the end
     # to apply the window at the borders
     s = np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
-    w = np.kaiser(window_len,beta)
-    y = np.convolve(w/w.sum(),s,mode='valid')
+    w = np.kaiser(window_len,beta)#creates kaiser window
+    y = np.convolve(w/w.sum(),s,mode='valid')#convolve normalized window with data
     return y[5:len(y)-5]
 #
 #
@@ -57,14 +57,14 @@ def dih_plotter2(dirname,savename,numplot):
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        ysmooth = dih_smooth(y,14)
-        ysmoother = dih_boxcar(ysmooth,3)
+        ysmooth = dih_smooth(y,14)#kaiser smoothing
+        ysmoother = dih_boxcar(ysmooth)#boxcar smoothing
         peaklist =signal.find_peaks_cwt(ysmoother, np.arange(5,20))#continuous wavelet transformation
         plt.plot(x,ysmoother,color = next(colors))
         for num in peaklist:
             plt.plot(x[num],ysmoother[num],'gD')#places markers on peaks
         peak = max(ysmoother)
-        peaklist2 = [i for i, j in enumerate(ysmoother) if j == peak]
+        peaklist2 = [i for i, j in enumerate(ysmoother) if j == peak]#places markers on absolute peaks
         for num in peaklist2:
             plt.plot(x[num],ysmoother[num],'rD')
 
