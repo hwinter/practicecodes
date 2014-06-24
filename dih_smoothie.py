@@ -59,15 +59,14 @@ def dih_plotter2(dirname,savename,numplot):
         y = memberlist[1] #y coordinate data
         ysmooth = dih_smooth(y,14)
         ysmoother = dih_boxcar(ysmooth,3)
-        xnew = x[0:len(ysmoother)]
-        peaklist =signal.find_peaks_cwt(ysmoother, np.arange(3,20))#continuous wavelet transformation
-        plt.plot(xnew,ysmoother,color = next(colors))
+        peaklist =signal.find_peaks_cwt(ysmoother, np.arange(5,20))#continuous wavelet transformation
+        plt.plot(x,ysmoother,color = next(colors))
         for num in peaklist:
-            plt.plot(xnew[num],ysmoother[num],'gD')#places markers on peaks
+            plt.plot(x[num],ysmoother[num],'gD')#places markers on peaks
         peak = max(ysmoother)
         peaklist2 = [i for i, j in enumerate(ysmoother) if j == peak]
         for num in peaklist2:
-            plt.plot(xnew[num],ysmoother[num],'rD')
+            plt.plot(x[num],ysmoother[num],'rD')
 
 #finish up plot characteristics
     plt.title('Super Most Awesome Graph!')
