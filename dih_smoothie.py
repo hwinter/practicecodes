@@ -23,6 +23,7 @@ import matplotlib.cm as cm
 from scipy import signal
 from dih_tableread import dih_filegrab
 from dih_tableread import dih_tablereader
+from dih_boxcar import dih_boxcar
 
 def dih_smooth(x,beta):
     """ kaiser window smoothing """
@@ -57,14 +58,16 @@ def dih_plotter2(dirname,savename,numplot):
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
         ysmooth = dih_smooth(y,14)
-        peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,30))#continuous wavelet transformation
-        plt.plot(x,ysmooth,color = next(colors))
+        ysmoother = dih_boxcar(ysmooth,3)
+        xnew = x[0:len(ysmoother)]
+        peaklist =signal.find_peaks_cwt(ysmoother, np.arange(3,20))#continuous wavelet transformation
+        plt.plot(xnew,ysmoother,color = next(colors))
         for num in peaklist:
-            plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
-        peak = max(ysmooth)
-        peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]
+            plt.plot(xnew[num],ysmoother[num],'gD')#places markers on peaks
+        peak = max(ysmoother)
+        peaklist2 = [i for i, j in enumerate(ysmoother) if j == peak]
         for num in peaklist2:
-            plt.plot(x[num],ysmooth[num],'rD')
+            plt.plot(xnew[num],ysmoother[num],'rD')
 
 #finish up plot characteristics
     plt.title('Super Most Awesome Graph!')
