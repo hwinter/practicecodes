@@ -18,8 +18,8 @@ import dih_sunchannel as channel
 #
 #
 def dih_lightcurve(dirname,savename):
-	x = times.dih_sunplot_times(dirname)
-	y = values.dih_suncurve(dirname)
+	x = times.dih_sunplot_times(dirname)#retrieves times
+	y = values.dih_suncurve(dirname)#retrieves fluxes
 	plt.plot(x,y,'b',linewidth = 2.0)
 	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirname)+ ' '+ str(channel.dih_sunchannel(dirname))+'$\AA$',y=1.07)
 	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirname))
