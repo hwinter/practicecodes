@@ -14,6 +14,8 @@ import dih_sunchannel as channel
 #
 #Outputs:plot saved as savename
 #
+#Example: data = dih_lightcurve('../aiadata','plot.ps')
+#
 #Written:6/25/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
@@ -25,4 +27,4 @@ def dih_lightcurve(dirname,savename):
 	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirname))
 	plt.ylabel('Arbitrary Flux Units')
 	plt.savefig(savename)
-	return y
+	return zip(x,y)
