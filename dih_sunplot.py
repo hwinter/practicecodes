@@ -15,14 +15,14 @@ from datetime import datetime
 #Written:6/25/14 Dan Herman	daniel.herman@cfa.harvard.edu
 #
 def dih_sunplot_times(dirname):
-	filelist = glob.glob(dirname+"/*.fits")
+	filelist = glob.glob(dirname+"/*.fits")#get files
 	maplist = []
-	for member in filelist:
+	for member in filelist:#make list of sunpy maps
 		my_map = sunpy.map.Map(member)
 		maplist.append(my_map)
 	difflist = []
 	maplist1 = maplist[1:len(maplist)]
-	for map in maplist:
+	for map in maplist:#populate difflist with time differences to first map
 		string1 = maplist[0].date
 		string2 = map.date
 		d1 = datetime.strptime(string1, '%Y-%m-%dT%H:%M:%S.%f')
