@@ -11,4 +11,5 @@ def dih_sunplot(dirname):
 		maplist.append(my_map)
 	mapcube = sunpy.map.Map(maplist,cube = True)
 	alignedcube = mapcube_coalign_by_match_template(mapcube)
-	return alignedcube
+    return alignedcube
+
