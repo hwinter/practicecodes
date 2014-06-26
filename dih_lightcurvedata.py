@@ -5,6 +5,7 @@ import dih_sunplot as times
 import dih_suncurve as values
 import dih_sundate as date
 import dih_sunchannel as channel
+import dih_dir_finder as finder
 #
 #Name:dih_lightcurvedata
 #
@@ -20,6 +21,11 @@ import dih_sunchannel as channel
 #
 #
 def dih_lightcurvedata(dirname):
-	x = times.dih_sunplot_times(dirname)#retrieves times
-	y = values.dih_suncurve(dirname)#retrieves fluxes
-	return zip(x,y)
+	fitslist = finder.dih_dir_finder(dirname)
+	lightcurvelist = []
+	for dirpath in fitslist:
+		x = times.dih_sunplot_times(dirpath)#retrieves times
+		y = values.dih_suncurve(dirpath)#retrieves fluxes
+		app = zip(x,y)
+		lightcurvelist.append(app)
+	return lightcurvelist
