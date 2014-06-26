@@ -19,6 +19,7 @@ import dih_suncurve as values
 import dih_sundate as date
 import dih_sunchannel as channel
 from scipy.signal import argrelextrema
+import dih_dir_finder as finder
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta):
@@ -50,31 +51,33 @@ def dih_smooth(x,beta):
 #
 #
 def dih_plotter3(dirname,savename,kaiser,boxcar,both):
-    inlist = zip(*dih_lightcurvedata(dirname))
-    plotlist = [list(row) for row in inlist]
-    colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
-    x = plotlist[0] #x coordinate data
-    y = plotlist[1] #y coordinate data
-    if kaiser == 1:
-    	ysmooth = dih_smooth(y,14)#kaiser smoothing
-    if boxcar == 1:
-    	ysmooth = dih_boxcar(y)#boxcar smoothing
-    if both == 1:
-    	ysmooth = dih_boxcar(dih_smooth(y,14))
-    #peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,10))#continuous wavelet transformation
-    peaklist = argrelextrema(ysmooth, np.greater)
-    plt.plot(x,ysmooth,color = next(colors))
-    for num in peaklist[0]:
-    	plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
-    peak = max(ysmooth)
-    peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]#places markers on absolute peaks
-    for num in peaklist2:
-    	plt.plot(x[num],ysmooth[num],'rD')
+    fitslist = finder.dih_dir_finder(dirname)
+    for dirpath in fitslist:
+    	inlist = zip(*dih_lightcurvedata(dirpath))
+    	plotlist = [list(row) for row in inlist]
+    	colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
+    	x = plotlist[0] #x coordinate data
+    	y = plotlist[1] #y coordinate data
+    	if kaiser == 1:
+    		ysmooth = dih_smooth(y,14)#kaiser smoothing
+    	if boxcar == 1:
+    		ysmooth = dih_boxcar(y)#boxcar smoothing
+    	if both == 1:
+    		ysmooth = dih_boxcar(dih_smooth(y,14))
+    	#peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,10))#continuous wavelet transformation
+    	peaklist = argrelextrema(ysmooth, np.greater)
+    	plt.plot(x,ysmooth,color = next(colors))
+    	for num in peaklist[0]:
+    		plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
+    	peak = max(ysmooth)
+    	peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]#places markers on absolute peaks
+    	for num in peaklist2:
+    		plt.plot(x[num],ysmooth[num],'rD')
 
 #finish up plot characteristics
-    plt.plot(x,y,'b',linewidth = 2.0)
-    plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirname)+ ' '+ str(channel.dih_sunchannel(dirname))+'$\AA$',y=1.07)
-    plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirname))
-    plt.ylabel('Arbitrary Flux Units')
-    plt.savefig(savename)#saves postscript file
-    return plotlist
+    	plt.plot(x,y,'b',linewidth = 2.0)
+    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirname)+ ' '+ str(channel.dih_sunchannel(dirname))+'$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirname))
+    	plt.ylabel('Arbitrary Flux Units')
+    	plt.savefig(savename)#saves postscript file
+    return fitslist
