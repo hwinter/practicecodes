@@ -52,7 +52,8 @@ def dih_smooth(x,beta):
 #
 def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     fitslist = finder.dih_dir_finder(dirname)
-    for dirpath in fitslist:
+    for idx,dirpath in enumerate(fitslist):
+    	print "processing"+str(idx)
     	inlist = zip(*dih_lightcurvedata(dirpath))
     	plotlist = [list(row) for row in inlist]
     	colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
@@ -67,8 +68,8 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	#peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,10))#continuous wavelet transformation
     	peaklist = argrelextrema(ysmooth, np.greater)
     	plt.plot(x,ysmooth,color = next(colors))
-    	for num in peaklist[0]:
-    		plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
+    	#for num in peaklist[0]:
+    		#plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
     	peak = max(ysmooth)
     	peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]#places markers on absolute peaks
     	for num in peaklist2:
@@ -76,8 +77,8 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
 
 #finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 2.0)
-    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirname)+ ' '+ str(channel.dih_sunchannel(dirname))+'$\AA$',y=1.07)
-    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirname))
+    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
     	plt.ylabel('Arbitrary Flux Units')
-    	plt.savefig(savename)#saves postscript file
+    	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
     return fitslist
