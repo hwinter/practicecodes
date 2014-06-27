@@ -20,12 +20,7 @@ import dih_dir_finder as finder
 #Written:6/25/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_lightcurvedata(dirname):
-	fitslist = finder.dih_dir_finder(dirname)
-	lightcurvelist = []
-	for dirpath in fitslist:
-		x = times.dih_sunplot_times(dirpath)#retrieves times
-		y = values.dih_suncurve(dirpath)#retrieves fluxes
-		app = zip(x,y)
-		lightcurvelist.append(app)
-	return lightcurvelist
+def dih_lightcurvedata(name):
+	x = times.dih_sunplot_times(name)#retrieves times
+	y = values.dih_suncurve(name)#retrieves fluxes
+	return zip(x,y)
