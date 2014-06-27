@@ -23,4 +23,3 @@ def dih_suncurve(dirname):
 		sigma = np.sum(my_map)
 		curvelist.append(sigma)
 	return curvelist
-	

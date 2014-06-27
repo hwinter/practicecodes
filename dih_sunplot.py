@@ -31,6 +31,4 @@ def dih_sunplot_times(dirname):
 		diff = deltatime.total_seconds()
 		difflist.append(diff)
 	return difflist
-		
-
 
