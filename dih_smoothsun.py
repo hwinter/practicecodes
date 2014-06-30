@@ -65,6 +65,9 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	innerdatalist.append(x)
     	y = plotlist[1] #y coordinate data
     	innerdatalist.append(y)
+    	#save each lightcurve's raw data into separate txt file
+    	with open(savename+str(idx)+'.txt','wb') as fff:
+    		pickle.dump(innerdatalist,fff)
     	print innerdatalist
     	outerdatalist.append(innerdatalist)#rough data to be sent to pickle dump
     	if kaiser == 1:
@@ -83,7 +86,7 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]#places markers on absolute peaks
     	for num in peaklist2:
     		plt.plot(x[num],ysmooth[num],'rD',linewidth =1.5)
-
+    		
 #finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
     	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
