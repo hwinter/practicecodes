@@ -28,13 +28,25 @@ def dih_spike_picker(inarray):
     cave = min(inarray)
     diff = crest - cave
     crestlist = [i for i, j in enumerate(inarray) if j == crest]
+    print crestlist
     for num in crestlist:
-        crestarray = inarray[num-2:num+3]
+    	print num
+        if num < len(inarray)-3 and num > 2:
+        	crestarray = inarray[num-2:num+3]
+        	numlist = range(num-2,num+3)
+        elif num >= len(inarray)-3:
+        	crestarray = inarray[len(inarray)-3:len(inarray)]
+        	numlist = range(len(inarray)-3,len(inarray))
+        elif num <= 2:
+        	crestarray = inarray[0:3]
+        	numlist = range(0,3)
+        else:
+        	print "bad index"	
         subdiff = max(crestarray) - min(crestarray)
-        numlist = range(num-2,num+3)
-        if subdiff > .4*diff:
+        if subdiff > .5*diff:
             for member in numlist:
             	inarray[member] = min(crestarray)
+            dih_spike_picker(inarray)
         else:
             print 'Not a false spike'
     return inarray
