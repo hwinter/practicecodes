@@ -12,7 +12,7 @@ import matplotlib.cm as cm
 from scipy import signal
 from dih_tableread import dih_filegrab
 from dih_tableread import dih_tablereader
-from dih_boxcar import dih_boxcar
+import dih_boxcar as d
 from dih_lightcurvedata import dih_lightcurvedata
 import dih_sunplot as times
 import dih_suncurve as values
@@ -25,17 +25,30 @@ import dih_spike_picker as spike
 import dih_spike_picker2 as spike2
 
 #see dih_smoothie for documentation for dih_smooth module
-def dih_smooth(x,beta):
+def dih_smooth(x,beta,num1):
     """ kaiser window smoothing """
-    window_len=7
+    window_len=num1
+    halflen=(window_len-1)/2
     # extending the data at beginning and at the end
     # to apply the window at the borders
     s = np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
     w = np.kaiser(window_len,beta)#creates kaiser window
     y = np.convolve(w/w.sum(),s,mode='valid')#convolve normalized window with data
-    return y[3:len(y)-3]
+    return y[halflen:len(y)-halflen]
 #
 #
+#Name:dih_smooth_recurs
+#
+#Purpose:complete a number of kaiser convolution by recursion 
+def dih_kaiser_recurs(x,beta,num1,rounds):
+	counter = rounds
+	out = x
+	while counter > 0:
+		print 'smoothing on '+str(counter)
+		out = dih_smooth(out,beta,num1)
+		counter = counter-1
+		continue
+	return out
 #
 #Name:dih_plotter3
 #
@@ -73,11 +86,11 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	print innerdatalist
     	outerdatalist.append(innerdatalist)#rough data to be sent to pickle dump
     	if kaiser == 1:
-    		ysmooth = dih_smooth(y,14)#kaiser smoothing
+    		ysmooth = dih_smooth(y,14,7)#kaiser smoothing
     	if boxcar == 1:
-    		ysmooth = dih_boxcar(y)#boxcar smoothing
+    		ysmooth = dih_boxcar(y,21)#boxcar smoothing
     	if both == 1:
-    		ysmooth = dih_boxcar(dih_smooth(y,14))
+    		ysmooth = dih_boxcar(dih_smooth(y,14),21)
     	#peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,10))#continuous wavelet transformation
     	yspikeless = spike.dih_spike_picker(ysmooth)
     	peaklist = argrelextrema(yspikeless, np.greater)
@@ -123,11 +136,12 @@ def dih_plotter4(dirname,savename,kaiser,boxcar,both):
     	print innerdatalist
     	outerdatalist.append(innerdatalist)#rough data to be sent to pickle dump
     	if kaiser == 1:
-    		ysmooth = dih_smooth(y,14)#kaiser smoothing
+    		ysmooth = dih_smooth(y,14,7)#kaiser smoothing
     	if boxcar == 1:
-    		ysmooth = dih_boxcar(y)#boxcar smoothing
+    		ysmooth = d.dih_boxcar_recurs(y,21)#boxcar smoothing
     	if both == 1:
-    		ysmooth = dih_boxcar(dih_smooth(y,14))
+    		ysmooth = dih_boxcar(dih_smooth(y,14),21)
+    	ycopy = ysmooth
     	yspikeless = spike2.dih_spike_picker2(ysmooth)
     	peaklist =signal.find_peaks_cwt(yspikeless, np.arange(2,14))
     	print peaklist
@@ -145,7 +159,7 @@ def dih_plotter4(dirname,savename,kaiser,boxcar,both):
     	peak = max(yspikeless)
     	peaklist2 = [i for i, j in enumerate(yspikeless) if j == peak]#places markers on absolute peaks
     	for num in peaklist2:
-    		plt.plot(x[num],ysmooth[num],'rD',linewidth =1.5)
+    		plt.plot(x[num],yspikeless[num],'rD',linewidth =1.5)
     		
 #finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
