@@ -24,12 +24,28 @@ from scipy import signal
 #Written:6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_boxcar(x):
-	width = 3
-	s = np.r_[x[width-1:0:-1],x,x[-1:-width:-1]]
+def dih_boxcar(x,num1):
+	width = num1
+	halfwidth = (width-1)/2
+	s = np.r_[np.array(x[width-1:0:-1]),x,np.array(x[-1:-width:-1])]
 	out = np.convolve(s, np.ones((width,))/width,mode='valid')
-	return out[1:len(out)-1]
-	
+	return out[halfwidth:len(out)-halfwidth]
+#
+#
+#
+#Name: dih_boxcar_recurs
+#
+def dih_boxcar_recurs(x,num1,rounds):
+	counter = rounds
+	out = x
+	while counter > 0:
+		print 'smoothing on '+str(counter)
+		out = dih_boxcar(out,num1)
+		counter = counter-1
+		continue
+	return out
+		
+			
 #Name: dih_plotter3
 #
 #Purpose: use dih_boxcar to provide smoothing....see dih_plotter2 in dih_smoothie for more
