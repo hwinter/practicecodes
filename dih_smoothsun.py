@@ -23,6 +23,7 @@ import dih_dir_finder as finder
 import pickle
 import dih_spike_picker as spike
 import dih_spike_picker2 as spike2
+import time
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
@@ -50,9 +51,9 @@ def dih_kaiser_recurs(x,beta,num1,rounds):
 		continue
 	return out
 #
-#Name:dih_plotter3
+#Name:dih_uberplotter
 #
-#Purpose:attempt at using kaiser smoothed data to find peaks and plot them
+#Purpose:smoothing/peak-finding/plotting program for AIA data
 #
 #Inputs: directory string, savename string, number of files to read from directory
 #
@@ -66,10 +67,9 @@ def dih_kaiser_recurs(x,beta,num1,rounds):
 #Written:6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_plotter3(dirname,savename,kaiser,boxcar,both):
+def dih_uberplotter(dirname,savename):
     fitslist = finder.dih_dir_finder(dirname)
     print fitslist
-    outerdatalist = []
     for idx,dirpath in enumerate(fitslist):
     	print "processing "+str(idx)
     	innerdatalist = []
@@ -81,27 +81,44 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	y = plotlist[1] #y coordinate data
     	innerdatalist.append(y)
     	#save each lightcurve's raw data into separate txt file
-    	with open(savename+str(idx)+'.txt','wb') as fff:
+    	with open(savename+str(idx)+'.txt','wb') as fff:#pickle dump for data for easy recapture with python
     		pickle.dump(innerdatalist,fff)
-    	print innerdatalist
-    	outerdatalist.append(innerdatalist)#rough data to be sent to pickle dump
-    	if kaiser == 1:
-    		ysmooth = dih_smooth(y,14,7)#kaiser smoothing
-    	if boxcar == 1:
-    		ysmooth = dih_boxcar(y,21)#boxcar smoothing
-    	if both == 1:
-    		ysmooth = dih_boxcar(dih_smooth(y,14),21)
-    	#peaklist =signal.find_peaks_cwt(ysmooth, np.arange(1,10))#continuous wavelet transformation
-    	yspikeless = spike.dih_spike_picker(ysmooth)
-    	peaklist = argrelextrema(yspikeless, np.greater)
+    	#also save the data into human-readable format for use with other programming languages
+    	np.savetxt(savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+date.dih_sunfirst(dirpath)+' for channel '+str(channel.dih_sunchannel(dirpath))+' created on '+time.strftime("%c"))
+    	yspikeless = spike.dih_spike_picker(y)
+    	yspikeless = spike.dih_dip_picker(yspikeless)
+    	if channel.dih_sunchannel(dirpath) == 171:
+    		ysmooth = dih_boxavg_recurs(yspikeless,7,9)#boxcar smoothing
+    		window = 7
+    	elif channel.dih_sunchannel(dirpath) == 211:
+    		ysmooth	= dih_boxavg_recurs(yspikeless,7,9)
+    		window = 7
+    	elif channel.dih_sunchannel(dirpath) == 131:
+    		ysmooth = dih_boxavg_recurs(yspikeless,23,3)
+    		window = 23
+    	else:
+    		print 'Not a valid channel!'
+    	diplist = argrelextrema(ysmooth[window:len(y)-window],np.less)
+    	peaklist = argrelextrema(ysmooth[window:len(y)-window], np.greater)
+    	x_short = x[window:len(y)-window]
+    	y_short = y[window:len(y)-window]
+    	sub_y_list = np.split(y_short,diplist[0])
+    	sub_x_list = np.split(x_short,diplist[0])
     	plt.figure()
     	plt.plot(x,ysmooth,color = next(colors))
+    	for idx,member in enumerate(sub_y_list):
+    		member = spike.dih_spike_picker(member)
+    		subpeak = max(member)
+    		subpeaklist = [i for i, j in enumerate(member) if j== subpeak]
+    		for num in subpeaklist:
+    			plt.plot(sub_x_list[idx][num],member[num],'rD')
+    	
     	#for num in peaklist[0]:
     		#plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
-    	peak = max(yspikeless)
-    	peaklist2 = [i for i, j in enumerate(yspikeless) if j == peak]#places markers on absolute peaks
-    	for num in peaklist2:
-    		plt.plot(x[num],ysmooth[num],'rD',linewidth =1.5)
+    	#peak = max(yspikeless)
+    	#peaklist2 = [i for i, j in enumerate(yspikeless) if j == peak]#places markers on absolute peaks
+    	#for num in peaklist2:
+    		#plt.plot(x[num],ysmooth[num],'rD',linewidth =1.5)
     		
 #finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
@@ -109,9 +126,6 @@ def dih_plotter3(dirname,savename,kaiser,boxcar,both):
     	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
-    with open(savename+'.txt','wb') as ff:
-    	pickle.dump(outerdatalist,ff)
-    
 	return outerdatalist
 
 
