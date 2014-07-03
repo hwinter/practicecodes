@@ -24,6 +24,7 @@ import pickle
 import dih_spike_picker as spike
 import dih_spike_picker2 as spike2
 import time
+import dih_goes_getter as goes
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
@@ -132,6 +133,17 @@ def dih_uberplotter(dirname,savename):
 #
 #
 #Name: dih_sun_plotter
+#
+#
+#purpose: implements specialized smoothing for each AIA data channel
+#
+#
+#Inputs: Directory containing directories with fits files, savename string to be used for saving plots,raw data, metadata
+#
+#Outputs: Plots lightcurves and saves them, creates txt file (both human and nonhuman readable) for raw data and metadata
+#
+#
+
 
 def dih_sun_plotter(dirname,savename):
     fitslist = finder.dih_dir_finder(dirname)
@@ -167,30 +179,30 @@ def dih_sun_plotter(dirname,savename):
     	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
     	plt.figure()
     	for member in peaklist[0]:
-			if member < window or member > (len(ysmooth)-window):
-				continue
-			else:
-				plt.plot(x[member],ysmooth[member],'yD')
-				continue	
-		for member in subpeaklist:
-			plt.plot(x[member],ysmooth[member],'rD')
-		observed = np.array(list[num1][1])
-		expected = np.array(endrange)*np.sum(observed)
-		chi = chisquare(observed,expected)
-		metadatalist = []
-		metadatalist.append(date.dih_sunfirst(dirpath))
-		metadatalist.append(channel.dih_sunchannel(dirpath))
-		metadatalist.append(chi)
-		with open(savename+str(idx)+'meta.txt','wb') as fff:
+    		if member < window or member > (len(ysmooth)-window):
+    			continue
+    		else:
+    			plt.plot(x[member],ysmooth[member],'yD')
+    			continue	
+    	for member in subpeaklist:
+    		plt.plot(x[member],ysmooth[member],'rD')
+    	observed = np.array(list[num1][1])
+    	expected = np.array(endrange)*np.sum(observed)
+    	chi = chisquare(observed,expected)
+    	metadatalist = []
+    	metadatalist.append(date.dih_sunfirst(dirpath))
+    	metadatalist.append(channel.dih_sunchannel(dirpath))
+    	metadatalist.append(chi)
+    	with open(savename+str(idx)+'meta.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
-		np.savetxt(savename+'datacol.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)))
-		#finish up plot characteristics
-		plt.plot(x,y,'b',linewidth = 1.0)
-		plt.plot(x,y,'r',linewidth = 1.5)
-		plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
-		plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
-		plt.ylabel('Arbitrary Flux Units')
-		plt.savefig(savename+str(idx)+'.ps')#saves postscript file
+    	np.savetxt(savename+'datacol.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)))
+    	#finish up plot characteristics
+    	plt.plot(x,y,'b',linewidth = 1.0)
+    	plt.plot(x,y,'r',linewidth = 1.5)
+    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
+    	plt.ylabel('Arbitrary Flux Units')
+    	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
 
     
 	return outerdatalist
