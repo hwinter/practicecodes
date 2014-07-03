@@ -92,9 +92,6 @@ def dih_uberplotter(dirname,savename):
     		window = 7
     	elif channel.dih_sunchannel(dirpath) == 211:
     		ysmooth	= dih_boxavg_recurs(yspikeless,7,9)
-    		window = 7
-    	elif channel.dih_sunchannel(dirpath) == 131:
-    		ysmooth = dih_boxavg_recurs(yspikeless,23,3)
     		window = 23
     	else:
     		print 'Not a valid channel!'
@@ -128,9 +125,15 @@ def dih_uberplotter(dirname,savename):
     	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
 	return outerdatalist
 
+#
+#
+#
+#
+#
+#
+#Name: dih_sun_plotter
 
-
-def dih_plotter4(dirname,savename,kaiser,boxcar,both):
+def dih_sun_plotter(dirname,savename):
     fitslist = finder.dih_dir_finder(dirname)
     print fitslist
     outerdatalist = []
@@ -147,41 +150,47 @@ def dih_plotter4(dirname,savename,kaiser,boxcar,both):
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
-    	print innerdatalist
-    	outerdatalist.append(innerdatalist)#rough data to be sent to pickle dump
-    	if kaiser == 1:
-    		ysmooth = dih_smooth(y,14,7)#kaiser smoothing
-    	if boxcar == 1:
-    		ysmooth = d.dih_boxcar_recurs(y,21)#boxcar smoothing
-    	if both == 1:
-    		ysmooth = dih_boxcar(dih_smooth(y,14),21)
-    	ycopy = ysmooth
-    	yspikeless = spike2.dih_spike_picker2(ysmooth)
-    	peaklist =signal.find_peaks_cwt(yspikeless, np.arange(2,14))
-    	print peaklist
-    	crestlist = []
-    	cresttimelist = []
-    	for member in peaklist:
-    		crestlist.append(yspikeless[member])
-    		cresttimelist.append(x[member])
-    	crestlist = np.array(crestlist)
-    	uberlist = argrelextrema(crestlist, np.greater)
+    	np.savetxt(savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+date.dih_sunfirst(dirpath)+' for channel '+str(channel.dih_sunchannel(dirpath))+' created on '+time.strftime("%c"))
+    	yspikeless = spike.dih_spike_picker(y)
+    	yspikeless = spike.dih_dip_picker(yspikeless)
+    	if channel.dih_sunchannel(dirpath) == 131:
+    		ysmooth = d.dih_boxcar_recurs(yspikeless,11,11)
+    		window = 11
+    	if channel.dih_sunchannel(dirpath) == 171:
+    		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+    		window = 7
+    	if channel.dih_sunchannel(dirpath) == 211:
+    		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+    		window = 7
+    	peaklist = argrelextrema(ysmooth,np.greater)
+    	peak = max(endrange[(window-1)/2:len(ysmooth)-(window-1)/2])
+    	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
     	plt.figure()
-    	plt.plot(x,ysmooth,color = next(colors))
-    	for member in uberlist[0]:
-    		plt.plot(cresttimelist[member],crestlist[member],'gD')#places markers on peaks
-    	peak = max(yspikeless)
-    	peaklist2 = [i for i, j in enumerate(yspikeless) if j == peak]#places markers on absolute peaks
-    	for num in peaklist2:
-    		plt.plot(x[num],yspikeless[num],'rD',linewidth =1.5)
-    		
-#finish up plot characteristics
-    	plt.plot(x,y,'b',linewidth = 1.0)
-    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
-    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
-    	plt.ylabel('Arbitrary Flux Units')
-    	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
-    with open(savename+'.txt','wb') as ff:
-    	pickle.dump(outerdatalist,ff)
+    	for member in peaklist[0]:
+			if member < window or member > (len(ysmooth)-window):
+				continue
+			else:
+				plt.plot(x[member],ysmooth[member],'yD')
+				continue	
+		for member in subpeaklist:
+			plt.plot(x[member],ysmooth[member],'rD')
+		observed = np.array(list[num1][1])
+		expected = np.array(endrange)*np.sum(observed)
+		chi = chisquare(observed,expected)
+		metadatalist = []
+		metadatalist.append(date.dih_sunfirst(dirpath))
+		metadatalist.append(channel.dih_sunchannel(dirpath))
+		metadatalist.append(chi)
+		with open(savename+str(idx)+'meta.txt','wb') as fff:
+    		pickle.dump(metadatalist,fff)
+		np.savetxt(savename+'datacol.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)))
+		#finish up plot characteristics
+		plt.plot(x,y,'b',linewidth = 1.0)
+		plt.plot(x,y,'r',linewidth = 1.5)
+		plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
+		plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
+		plt.ylabel('Arbitrary Flux Units')
+		plt.savefig(savename+str(idx)+'.ps')#saves postscript file
+
     
 	return outerdatalist
