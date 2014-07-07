@@ -44,15 +44,21 @@ from datetime import timedelta
 #
 #
 
-def dih_goes_checker(dirname,filename,max,rel)
+def dih_goes_checker(dirname,filename,max,rel):
 	fitslist = finder.dih_dir_finder(dirname)
 	eventlist = []
 	for idx,member in enumerate(fitslist):
 		data = dih_filegrab(filename+'metacol'+str(idx)+'.txt')
 		if max == 1 and rel == 0:
-			peaklist = data[4]
+			peaklist = []
+			for member in data[4]:
+				timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
+				peaklist.append(timeval)
 		elif rel == 1 and max == 0:
-			peaklist = data[3]
+			peaklist = []
+			for member in data[3]:
+				timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
+				peaklit.append(timeval)
 		else:
 			print "bad keyword choice"
 		for member in peaklist:
