@@ -25,6 +25,8 @@ import dih_spike_picker as spike
 import dih_spike_picker2 as spike2
 import time
 import dih_goes_getter as goes
+from datetime import datetime
+from datetime import timedelta
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
@@ -148,11 +150,13 @@ def dih_uberplotter(dirname,savename):
 def dih_sun_plotter(dirname,savename):
     fitslist = finder.dih_dir_finder(dirname)
     print fitslist
-    outerdatalist = []
     for idx,dirpath in enumerate(fitslist):
     	print "processing "+str(idx)
     	innerdatalist = []
     	inlist = zip(*dih_lightcurvedata(dirpath))
+    	fitsdate = date.dih_sunfirst(dirpath)
+    	fitschannel = channel.dih_sunchannel(dirpath)
+    	fitscenter = data.dih_suncenter(dirpath)
     	plotlist = [list(row) for row in inlist]
     	colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
     	x = plotlist[0] #x coordinate data
@@ -162,7 +166,7 @@ def dih_sun_plotter(dirname,savename):
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
-    	np.savetxt(savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+date.dih_sunfirst(dirpath)+' for channel '+str(channel.dih_sunchannel(dirpath))+' created on '+time.strftime("%c"))
+    	np.savetxt(savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fitsdate+' for channel '+str(fitschannel)+' created on '+time.strftime("%c"))
     	yspikeless = spike.dih_spike_picker(y)
     	yspikeless = spike.dih_dip_picker(yspikeless)
     	if channel.dih_sunchannel(dirpath) == 131:
@@ -178,31 +182,68 @@ def dih_sun_plotter(dirname,savename):
     	peak = max(endrange[(window-1)/2:len(ysmooth)-(window-1)/2])
     	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
     	plt.figure()
+    	relpeaktimelist = []
     	for member in peaklist[0]:
     		if member < window or member > (len(ysmooth)-window):
     			continue
     		else:
     			plt.plot(x[member],ysmooth[member],'yD')
+    			firsttime = datetime.strptime(fitsdate,'%Y-%m-%dT%H:%M:%S.%f')
+    			timediff = datetime.timedelta(seconds = ysmooth[member])
+    			peaktime = firstime+timediff
+    			relpeaklist.append(peaktime)
     			continue	
-    	for member in subpeaklist:
+    	maxpeaktimelist = []
+    	for member in maxpeaklist:
     		plt.plot(x[member],ysmooth[member],'rD')
-    	observed = np.array(list[num1][1])
-    	expected = np.array(endrange)*np.sum(observed)
+    		firstime = datetime.strptime(fitsdate,'%Y-%m-%dT%H:%M:%S.%f')
+    		timediff = datetime.timedelta(seconds = ysmooth[member])
+    		peaktime = firstime+timediff
+    		maxpeaktimelist.append(peaktime)
+    	observed = np.array(y)
+    	expected = np.array(ysmooth)*np.sum(observed)
     	chi = chisquare(observed,expected)
     	metadatalist = []
-    	metadatalist.append(date.dih_sunfirst(dirpath))
-    	metadatalist.append(channel.dih_sunchannel(dirpath))
+    	metadatalist.append(fitsdate)
+    	metadatalist.append(fitschannel)
     	metadatalist.append(chi)
-    	with open(savename+str(idx)+'meta.txt','wb') as fff:
+    	metadatalist.append(relpeaktimelist)
+    	metadatalist.append(maxpeaktimelist)
+    	with open(savename+'meta'+str(idx)+'.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
-    	np.savetxt(savename+'datacol.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)))
+    	#Saving all relavant metadata/peakdata to human readable text file
+    	np.savetxt(savename+'metacol'+str(idx)+'.txt',np.column_stack((fitsdate,fitschannel,chi,relpeaktimelist,maxpeaktimelist,fitscenter)),header = 'Metadata created on '+time.strftime("%c"))
     	#finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
     	plt.plot(x,y,'r',linewidth = 1.5)
-    	plt.title('Lightcurve at'+' '+date.dih_sunfirst(dirpath)+ ' '+ str(channel.dih_sunchannel(dirpath))+'$\AA$',y=1.07)
-    	plt.xlabel('Seconds Since'+' '+date.dih_sunfirst(dirpath))
+    	plt.title('Lightcurve at'+' '+fitsdate+ ' '+ str(fitschannel)+'$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since'+' '+fitsdate)
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
 
     
 	return outerdatalist
+
+
+#Name: dih_sun_mapper
+#
+#Purpose:create maps for fits files and extracts useful data
+#
+#
+#
+def dih_sun_mapper(dirname,savename):
+	fitslist = finder.dih_dir_finder(dirname)impo
+	totalrawdata = []
+	for idx,dirpath in enumerate(fitslist):
+		print "processing "+str(idx)
+		inlist = zip(*dih_lightcurvedata(dirpath))
+		plotlist = [list(row) for row in inlist]
+		rawdata = plotlist
+		np.savetxt(savename+'rawcol'+str(idx)+'.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+date.dih_sunfirst(dirpath)+' for channel '+str(channel.dih_sunchannel(dirpath))+' created on '+time.strftime("%c"))
+		totalrawdata.append(rawdata)
+		np.savetxt(savename+'metacol'+str(idx)+'.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)),header = 'metadata for lightcurve generated on'+time.strftime("%c"))
+	return totalrawdata
+#
+#
+#
+#
