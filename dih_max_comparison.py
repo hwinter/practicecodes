@@ -46,7 +46,7 @@ def dih_max_comparison(dirname,filename):
 		subsharedlist = []
 		subsharedlist.append(member)
 		for guy in poppedlist:
-			if guy[0]< member[0]+cusp and guy[0]>member[0]+cusp and guy[1] != member[1]:
+			if guy[0]< member[0]+cusp and guy[0]>member[0]-cusp and guy[1] != member[1]:
 				subsharedlist.append(guy)
 				continue
 			else:
