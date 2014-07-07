@@ -17,3 +17,11 @@ def dih_sunfirst(dirname):
 	filelist = glob.glob(dirname+"/*.fits")
 	my_map = sunpy.map.Map(filelist[0])
 	return my_map.date
+#
+#
+#
+#
+def dih_suncenter(dirname):
+	filelist = glob.glob(dirname+"/*.fits")
+	my_map = sunpy.map.Map(filelist[0])
+	return my_map.center
