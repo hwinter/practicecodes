@@ -166,7 +166,7 @@ def dih_sun_plotter(dirname,savename):
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
-    	np.savetxt(savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fitsdate+' for channel '+str(fitschannel)+' created on '+time.strftime("%c"))
+    	np.savetxt(fitsdate+savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fitsdate+' for channel '+str(fitschannel)+' created on '+time.strftime("%c"))
     	yspikeless = spike.dih_spike_picker(y)
     	yspikeless = spike.dih_dip_picker(yspikeless)
     	if channel.dih_sunchannel(dirpath) == 131:
@@ -212,14 +212,14 @@ def dih_sun_plotter(dirname,savename):
     	with open(savename+'meta'+str(idx)+'.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
     	#Saving all relavant metadata/peakdata to human readable text file
-    	np.savetxt(savename+'metacol'+str(idx)+'.txt',np.column_stack((fitsdate,fitschannel,chi,relpeaktimelist,maxpeaktimelist,fitscenter)),header = 'Metadata created on '+time.strftime("%c"))
+    	np.savetxt(fitsdate+savename+'metacol'+str(idx)+'.txt',np.column_stack((fitsdate,fitschannel,chi,relpeaktimelist,maxpeaktimelist,fitscenter)),header = 'Metadata created on '+time.strftime("%c"))
     	#finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
     	plt.plot(x,y,'r',linewidth = 1.5)
     	plt.title('Lightcurve at'+' '+fitsdate+ ' '+ str(fitschannel)+'$\AA$',y=1.07)
     	plt.xlabel('Seconds Since'+' '+fitsdate)
     	plt.ylabel('Arbitrary Flux Units')
-    	plt.savefig(savename+str(idx)+'.ps')#saves postscript file
+    	plt.savefig(fitsdate+savename+str(idx)+'.ps')#saves postscript file
 
     
 	return outerdatalist
