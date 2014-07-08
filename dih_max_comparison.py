@@ -24,23 +24,35 @@ import time
 import dih_goes_getter as goes
 from datetime import datetime
 from datetime import timedelta
+import simplejson
 
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
 #
+#Inputs: Directory containing directory containing fits files to be analyzed (dirname) and
+#name used to save data sets from given directory (filename)
 #
+#Outputs:returns list of lists where each sublist represents a group of temporally related events
+#
+#Example: peakgrouplist = dih_max_comparison('/ivo/fits','sunnyplot')
+#
+#Written: 7/8/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+
 def dih_max_comparison(dirname,filename):
-	fitslist = finder.dih_dir_finder(dirname)
+	fitslist = finder.dih_dir_finder(dirname)[0]
 	peaklist = []
 	sharedlist = []
 	for idx,member in enumerate(fitslist):
-		data = dih_filegrab(filename+'metacol'+str(idx)+'.txt')
-		for member in data[4]:
+		data = simplejson.load(open(filename+'_human_meta'+str(idx)+'.txt','rb'))
+		for member in data[5]:
 			timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
 			channel = data[1]
 			peaklist.append([timeval,channel])
-	cusp = datetime.timedelta(seconds = 60)
+	cusp = datetime.timedelta(seconds = 180)
 	for idx,member in enumerate(peaklist):
 		poppedlist = list.pop([idx])
 		subsharedlist = []
@@ -54,7 +66,7 @@ def dih_max_comparison(dirname,filename):
 		subsharedlist = list(set(subsharedlist))
 		sharedlist.append(subsharedlist)
 	np.savetxt(filename+'sharedpeaks.txt',np.column_stack((subsharedlist)),header = 'List of shared peaks created on '+time.strftime("%c"))
-	return subsharedlist
+	return sharedlist
 		
 				
 		
