@@ -21,8 +21,9 @@ import dih_errmaker as d
 
 #helper fct grabs columns of data from ascii files and returns x and y columns
 def dih_filegrab(filename):
-    grabbedcol = np.genfromtxt(filename, skip_header=2, skip_footer=1)
-    return zip(*grabbedcol)
+    grabbedcol = np.genfromtxt(filename, skip_header=1,skip_footer=1)
+    columns = [list(row) for row in grabbedcol]
+    return columns
 
 #helper fct removes files from directory and grabs columns of data
 def dih_tablereader(dirname):
