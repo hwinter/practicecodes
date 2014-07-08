@@ -45,7 +45,7 @@ from datetime import timedelta
 #
 
 def dih_goes_checker(dirname,filename,max,rel):
-	fitslist = finder.dih_dir_finder(dirname)
+	fitslist = finder.dih_dir_finder(dirname)[0]
 	eventlist = []
 	for idx,member in enumerate(fitslist):
 		data = dih_filegrab(filename+'metacol'+str(idx)+'.txt')
@@ -62,8 +62,8 @@ def dih_goes_checker(dirname,filename,max,rel):
 		else:
 			print "bad keyword choice"
 		for member in peaklist:
-			time1 = member - timedelta(seconds = 180)
-			time2 = member + timedelta(seconds = 180)
+			time1 = member - timedelta(seconds = 300)
+			time2 = member + timedelta(seconds = 300)
 			subeventlist = dih_goes_getter(time1,time2)
 			if len(subeventlist) > 0:
 				print "Found Goes Event(s) near AIA Event"
