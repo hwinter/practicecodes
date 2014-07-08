@@ -33,4 +33,8 @@ def dih_dir_finder(dirpath):
     			fitslist.remove(member)
     		if '.txt' in member:
     			fitslist.remove(member)
-    return fitslist
+    		if '.DS_Store' in member:
+    			fitslist.remove(member)
+    		if '.sav' in member:
+    			fitslist.remove(member)
+    return [fitslist,ivolist]
