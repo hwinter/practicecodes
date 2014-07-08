@@ -14,7 +14,7 @@ from dih_tableread import dih_filegrab
 from dih_tableread import dih_tablereader
 import dih_boxcar as d
 from dih_lightcurvedata import dih_lightcurvedata
-import dih_sunplot as times
+import dih_sunplot as datum
 import dih_suncurve as values
 import dih_sundate as date
 import dih_sunchannel as channel
@@ -27,6 +27,8 @@ import time
 import dih_goes_getter as goes
 from datetime import datetime
 from datetime import timedelta
+from scipy.stats import chisquare
+import simplejson
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
@@ -76,12 +78,11 @@ def dih_uberplotter(dirname,savename):
     for idx,dirpath in enumerate(fitslist):
     	print "processing "+str(idx)
     	innerdatalist = []
-    	inlist = zip(*dih_lightcurvedata(dirpath))
-    	plotlist = [list(row) for row in inlist]
+    	inlist = datum.dih_sunplot_data(dirpath)
     	colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
-    	x = plotlist[0] #x coordinate data
+    	x = inlist[0] #x coordinate data
     	innerdatalist.append(x)
-    	y = plotlist[1] #y coordinate data
+    	y = inlist[1] #y coordinate data
     	innerdatalist.append(y)
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:#pickle dump for data for easy recapture with python
@@ -136,50 +137,60 @@ def dih_uberplotter(dirname,savename):
 #
 #Name: dih_sun_plotter
 #
-#
-#purpose: implements specialized smoothing for each AIA data channel
-#
+#Purpose: implements specialized smoothing for each AIA data channel
 #
 #Inputs: Directory containing directories with fits files, savename string to be used for saving plots,raw data, metadata
 #
 #Outputs: Plots lightcurves and saves them, creates txt file (both human and nonhuman readable) for raw data and metadata
 #
+#Example: foo = dih_sun_plotter('/users/fitsfiles','woohooplot')
+#
+#Written: 7/8/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
 #
 
 
 def dih_sun_plotter(dirname,savename):
-    fitslist = finder.dih_dir_finder(dirname)
+    directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+    fitslist = directory_lists[0]
+    ivolist = directory_lists[1]
     print fitslist
     for idx,dirpath in enumerate(fitslist):
     	print "processing "+str(idx)
     	innerdatalist = []
-    	inlist = zip(*dih_lightcurvedata(dirpath))
-    	fitsdate = date.dih_sunfirst(dirpath)
-    	fitschannel = channel.dih_sunchannel(dirpath)
-    	fitscenter = data.dih_suncenter(dirpath)
-    	plotlist = [list(row) for row in inlist]
-    	colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
-    	x = plotlist[0] #x coordinate data
+    	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
+    	fits_date = inlist[2]#datetime for first fits file in dirpath
+    	fits_channel = inlist[3]#channel for first fits
+    	fits_center = inlist[4]#center of first fits
+    	colors = iter(cm.rainbow(np.linspace(0,1,len(inlist[0])))) #creates color table
+    	x = inlist[1] #x coordinate data
     	innerdatalist.append(x)
-    	y = plotlist[1] #y coordinate data
+    	y = inlist[0] #y coordinate data
     	innerdatalist.append(y)
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
-    	np.savetxt(fitsdate+savename+'col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fitsdate+' for channel '+str(fitschannel)+' created on '+time.strftime("%c"))
-    	yspikeless = spike.dih_spike_picker(y)
-    	yspikeless = spike.dih_dip_picker(yspikeless)
-    	if channel.dih_sunchannel(dirpath) == 131:
+    	#human readable save format
+    	np.savetxt(fits_date+'_'+savename+'_col.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fits_date+' for channel '+str(fits_channel)+' created on '+time.strftime("%c"),footer = str(ivolist[idx]))
+    	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
+    	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
+    	#channel-selective smoothing
+    	if fits_channel == 131:
     		ysmooth = d.dih_boxcar_recurs(yspikeless,11,11)
     		window = 11
-    	if channel.dih_sunchannel(dirpath) == 171:
+    	if fits_channel == 171:
     		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
     		window = 7
-    	if channel.dih_sunchannel(dirpath) == 211:
+    	if fits_channel == 211:
     		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
     		window = 7
-    	peaklist = argrelextrema(ysmooth,np.greater)
-    	peak = max(endrange[(window-1)/2:len(ysmooth)-(window-1)/2])
+    	if fits_channel == 193:
+    		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+    		window = 7
+    	else:
+    		print "Bad Channel!"	
+    	peaklist = argrelextrema(ysmooth,np.greater)#relative max
+    	peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
     	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
     	plt.figure()
     	relpeaktimelist = []
@@ -188,41 +199,48 @@ def dih_sun_plotter(dirname,savename):
     			continue
     		else:
     			plt.plot(x[member],ysmooth[member],'yD')
-    			firsttime = datetime.strptime(fitsdate,'%Y-%m-%dT%H:%M:%S.%f')
-    			timediff = datetime.timedelta(seconds = ysmooth[member])
-    			peaktime = firstime+timediff
-    			relpeaklist.append(peaktime)
+    			#recreating peak times from time difference data
+    			first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    			timediff = timedelta(seconds = x[member])
+    			peaktime = first_time+timediff
+    			relpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
     			continue	
     	maxpeaktimelist = []
     	for member in maxpeaklist:
     		plt.plot(x[member],ysmooth[member],'rD')
-    		firstime = datetime.strptime(fitsdate,'%Y-%m-%dT%H:%M:%S.%f')
-    		timediff = datetime.timedelta(seconds = ysmooth[member])
-    		peaktime = firstime+timediff
-    		maxpeaktimelist.append(peaktime)
+    		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    		timediff = timedelta(seconds = x[member])
+    		peaktime = first_time+timediff
+    		maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    	#creating chi-squared value
     	observed = np.array(y)
     	expected = np.array(ysmooth)*np.sum(observed)
     	chi = chisquare(observed,expected)
     	metadatalist = []
-    	metadatalist.append(fitsdate)
-    	metadatalist.append(fitschannel)
+    	metadatalist.append(fits_date)
+    	metadatalist.append(fits_channel)
+    	metadatalist.append(fits_center)
     	metadatalist.append(chi)
     	metadatalist.append(relpeaktimelist)
     	metadatalist.append(maxpeaktimelist)
-    	with open(savename+'meta'+str(idx)+'.txt','wb') as fff:
+    	metadatalist.append(ivolist[idx])
+    	#pickling of metadata
+    	with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
     	#Saving all relavant metadata/peakdata to human readable text file
-    	np.savetxt(fitsdate+savename+'metacol'+str(idx)+'.txt',np.column_stack((fitsdate,fitschannel,chi,relpeaktimelist,maxpeaktimelist,fitscenter)),header = 'Metadata created on '+time.strftime("%c"))
+    	file = open(savename+'_human_meta'+str(idx)+'.txt','wb')
+    	simplejson.dump(metadatalist,file)
+    	file.close()
     	#finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
-    	plt.plot(x,y,'r',linewidth = 1.5)
-    	plt.title('Lightcurve at'+' '+fitsdate+ ' '+ str(fitschannel)+'$\AA$',y=1.07)
-    	plt.xlabel('Seconds Since'+' '+fitsdate)
+    	plt.plot(x,ysmooth,'r',linewidth = 1.5)
+    	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since'+' '+fits_date)
     	plt.ylabel('Arbitrary Flux Units')
-    	plt.savefig(fitsdate+savename+str(idx)+'.ps')#saves postscript file
+    	plt.savefig(fits_date+'_'+savename+str(idx)+'.ps')#saves postscript file
 
     
-	return outerdatalist
+	return inlist
 
 
 #Name: dih_sun_mapper
@@ -232,7 +250,7 @@ def dih_sun_plotter(dirname,savename):
 #
 #
 def dih_sun_mapper(dirname,savename):
-	fitslist = finder.dih_dir_finder(dirname)impo
+	fitslist = finder.dih_dir_finder(dirname)
 	totalrawdata = []
 	for idx,dirpath in enumerate(fitslist):
 		print "processing "+str(idx)
