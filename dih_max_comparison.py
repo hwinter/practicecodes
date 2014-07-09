@@ -43,12 +43,12 @@ import simplejson
 
 
 def dih_max_comparison(dirname,filename):
-	fitslist = finder.dih_dir_finder(dirname)[0]
+	fitslist = finder.dih_dir_finder(dirname)[0]#source ivo files to count over
 	peaklist = []
 	sharedlist = []
 	for idx,member in enumerate(fitslist):
 		data = simplejson.load(open(filename+'_human_meta'+str(idx)+'.txt','rb'))
-		for member in data[5]:
+		for member in data[4]:
 			timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
 			channel = data[1]
 			peaklist.append([timeval,channel])
@@ -68,6 +68,12 @@ def dih_max_comparison(dirname,filename):
 	np.savetxt(filename+'sharedpeaks.txt',np.column_stack((subsharedlist)),header = 'List of shared peaks created on '+time.strftime("%c"))
 	return sharedlist
 		
+#
+#
+#Name: dih_171_comparison
+#
+#def dih_171_comparison(dirname,filename1,filename2):
+	fitslist = finder.dih_dir_finder(dirname)[0]
 				
 		
 	
