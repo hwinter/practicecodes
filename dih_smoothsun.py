@@ -157,6 +157,8 @@ def dih_sun_plotter(dirname,savename):
     outerdatalist = []
     print fits_list
     for idx,dirpath in enumerate(fits_list):
+    	if idx < 18:
+    		continue
     	print "processing "+str(idx)
     	innerdatalist = []
     	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
@@ -198,8 +200,12 @@ def dih_sun_plotter(dirname,savename):
     	elif fits_channel == 193:
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
     		window = 7
+    	elif fits_channel == 304:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
+    		window = 7
     	else:
-    		print "Bad Channel!"	
+    		print "Bad Channel!"
+    		continue	
     	peaklist = argrelextrema(ysmooth,np.greater)#relative max
     	peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
     	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
@@ -277,7 +283,7 @@ def dih_sun_mapper(dirname,savename):
 #
 #
 def dih_sun_data_plot(savename,idx,newname):
-	datalist = pickle.load(open(savename+str(idx)'.txt','rb'))
+	datalist = pickle.load(open(savename+str(idx)+'.txt','rb'))
 	meta_datalist = pickle.load(open(savename+'_meta'+str(idx)+'.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
