@@ -157,8 +157,6 @@ def dih_sun_plotter(dirname,savename):
     outerdatalist = []
     print fits_list
     for idx,dirpath in enumerate(fits_list):
-    	if idx < 18:
-    		continue
     	print "processing "+str(idx)
     	innerdatalist = []
     	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
