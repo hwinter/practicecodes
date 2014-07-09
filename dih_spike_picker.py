@@ -43,9 +43,8 @@ def dih_spike_picker(inarray):
         	print "bad index"	
         subdiff = max(crestarray) - min(crestarray)
         if subdiff > .5*diff:
-            for member in numlist:
-            	inarray[member] = min(crestarray)
-            dih_spike_picker(inarray)
+        	inarray[num] = min(crestarray)
+        	dih_spike_picker(inarray)
         else:
             print 'Not a false spike'
     return inarray
@@ -57,22 +56,21 @@ def dih_dip_picker(inarray):
     cavelist = [i for i, j in enumerate(inarray) if j == cave]
     for num in cavelist:
     	print num
-        if num < len(inarray)-3 and num > 2:
-        	cavearray = inarray[num-2:num+3]
-        	numlist = range(num-2,num+3)
-        elif num >= len(inarray)-3:
-        	cavearray = inarray[len(inarray)-3:len(inarray)]
-        	numlist = range(len(inarray)-3,len(inarray))
-        elif num <= 2:
-        	cavearray = inarray[0:3]
-        	numlist = range(0,3)
+        if num < len(inarray)-2 and num > 1:
+        	cavearray = inarray[num-1:num+2]
+        	numlist = range(num-1,num+2)
+        elif num >= len(inarray)-2:
+        	cavearray = inarray[len(inarray)-2:len(inarray)]
+        	numlist = range(len(inarray)-2,len(inarray))
+        elif num <= 1:
+        	cavearray = inarray[0:2]
+        	numlist = range(0,2)
         else:
         	print "bad index"	
         subdiff = max(cavearray) - min(cavearray)
         if subdiff > .5*diff:
-            for member in numlist:
-            	inarray[member] = max(cavearray)
-            dih_dip_picker(inarray)
+        	inarray[num] = max(cavearray)
+        	dih_dip_picker(inarray)
         else:
             print 'Not a false dip'
     return inarray
