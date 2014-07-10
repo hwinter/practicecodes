@@ -30,6 +30,11 @@ from datetime import timedelta
 from scipy.stats import chisquare
 import simplejson
 import dih_boxavg as box
+import os.path
+
+
+
+
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
     """ kaiser window smoothing """
@@ -222,11 +227,19 @@ def dih_sun_plotter(dirname,savename):
     			continue	
     	maxpeaktimelist = []
     	for member in maxpeaklist:
-    		plt.plot(x[member],ysmooth[member],'rD')
     		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
     		timediff = timedelta(seconds = x[member])
     		peaktime = first_time+timediff
-    		maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    		if x[member] > 250 and x[member] < x[-1]-250:
+    			maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    		else:
+    			flagged_peaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    	real_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] > 250 and x[j] < x[-1]-250]
+    	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
+    	for member in real_peaklist:
+    		plt.plot(x[member],ysmooth[member],'gD')
+    	for member in flagged_peaklist:
+    		plt.plot(x[member],ysmooth[member],'rD')
     	#creating chi-squared value
     	observed = np.array(ycopy)
     	expected = np.array(ysmooth)*np.sum(observed)
@@ -238,6 +251,12 @@ def dih_sun_plotter(dirname,savename):
     	metadatalist.append(relpeaktimelist)
     	metadatalist.append(maxpeaktimelist)
     	metadatalist.append(ivo_list[idx])
+    	metadatalist.append(flagged_peaktimelist)
+    	smooth_range = max(ysmooth)-min(ysmooth)
+    	if smooth_range > max(ysmooth)*.2:
+    		metadatalist.append('flag')
+    	else:
+    		metadatalist.append('clear')	
     	#pickling of metadata
     	with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
@@ -280,30 +299,37 @@ def dih_sun_mapper(dirname,savename):
 #
 #
 #
-def dih_sun_data_plot(savename,idx,newname):
-	datalist = pickle.load(open(savename+str(idx)+'.txt','rb'))
-	meta_datalist = pickle.load(open(savename+'_meta'+str(idx)+'.txt','rb'))
+def dih_sun_data_plot(dirname,savename,num,newname):
+	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+	fits_list = directory_lists[0]
+	ivo_list = directory_lists[1]
+	datalist = pickle.load(open(savename+str(num)+'.txt','rb'))
+	meta_datalist = pickle.load(open(savename+'_meta'+str(num)+'.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
 	print str(fits_channel)
 	fits_center = meta_datalist[2]#center of first fits
 	colors = iter(cm.rainbow(np.linspace(0,1,len(datalist[0])))) #creates color table
 	x = datalist[0] #x coordinate data
-	y = datalist[0] #y coordinate data
+	y = datalist[1] #y coordinate data
+	ycopy = y
 	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
 	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
 	#channel-selective smoothing
 	if fits_channel == 131:
-		ysmooth = d.dih_boxcar_recurs(yspikeless,11,11)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,11,11)
 		window = 11
 	elif fits_channel == 171:
-		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
 		window = 7
 	elif fits_channel == 211:
-		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
 		window = 7
 	elif fits_channel == 193:
-		ysmooth = d.dih_boxcar_recurs(yspikeless,7,9)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
+		window = 7
+	elif fits_channel == 304:
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)	
 		window = 7
 	else:
 		print "Bad Channel!"	
@@ -324,12 +350,24 @@ def dih_sun_data_plot(savename,idx,newname):
 			relpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
 			continue	
 	maxpeaktimelist = []
+	flagged_peaktimelist=[]
 	for member in maxpeaklist:
-		plt.plot(x[member],ysmooth[member],'rD')
 		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
 		timediff = timedelta(seconds = x[member])
 		peaktime = first_time+timediff
-		maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+		if x[member] > 250 and x[member] < x[-1]-250:
+			maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+		else:
+			flagged_peaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+	real_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] > 250 and x[j] < x[-1]-250]
+	print maxpeaklist
+	print real_peaklist
+	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
+	print flagged_peaklist
+	for member in real_peaklist:
+		plt.plot(x[member],ysmooth[member],'gD')
+	for member in flagged_peaklist:
+		plt.plot(x[member],ysmooth[member],'rD')
 	#creating chi-squared value
 	observed = np.array(ycopy)
 	expected = np.array(ysmooth)*np.sum(observed)
@@ -341,14 +379,21 @@ def dih_sun_data_plot(savename,idx,newname):
 	metadatalist.append(chi)
 	metadatalist.append(relpeaktimelist)
 	metadatalist.append(maxpeaktimelist)
-	metadatalist.append(ivolist[idx])
+	metadatalist.append(ivo_list[num])
+	metadatalist.append(flagged_peaktimelist)
+	smooth_range = max(ysmooth)-min(ysmooth)
+	if smooth_range > max(ysmooth)*.2:
+		metadatalist.append('flag')
+	else:
+		metadatalist.append('clear')
 	#pickling of metadata
-	with open(savename+'_'+newname_+'_meta'+str(idx)+'.txt','wb') as fff:
+	with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
 		pickle.dump(metadatalist,fff)
-	with open(savename+'_'+newname+'_chi'+str(idx)+'.txt','wb') as fff:
+	with open(savename+'_'+newname+'_chi'+str(num)+'.txt','wb') as fff:
 		pickle.dump(chi,fff)
 	#Saving all relavant metadata/peakdata to human readable text file
-	file = open(savename+'_human_'+newname+'_meta'+str(idx)+'.txt','wb')
+	metadatalist.remove(chi)
+	file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
 	simplejson.dump(metadatalist,file)
 	file.close()
 	#finish up plot characteristics
@@ -357,6 +402,33 @@ def dih_sun_data_plot(savename,idx,newname):
 	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
 	plt.xlabel('Seconds Since'+' '+fits_date)
 	plt.ylabel('Arbitrary Flux Units')
-	plt.savefig(newname+fits_date+'_'+savename+str(idx)+'.ps')#saves postscript file
-	return [x,ycopy]
+	plt.savefig(newname+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
+	return metadatalist
+#
+#
+#
+#
+def dih_sun_recurs_data_plot(dirname,savename,newname):
+	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+	fits_list = directory_lists[0]
+	ivo_list = directory_lists[1]
+	print len(ivo_list)
+	print 'here'
+	file2 = open(savename+'_'+newname+'_human_meta_flagged.txt','wb')
+	list = range(len(ivo_list))
+	all_meta = []
+	for num in list:
+		if os.path.isfile(savename+str(num)+'.txt') == False or os.path.isfile(savename+'_meta'+str(num)+'.txt') == False:
+			continue
+		else:
+			metadatalist = dih_sun_data_plot(dirname,savename,num,newname)
+			all_meta.append(metadatalist)
+			continue
+	for member in all_meta:
+		if member[7] == 'flag':
+			simplejson.dump(member,file2)
+			file2.write('\n')
+	file2.close()
+	return all_meta
+		
 
