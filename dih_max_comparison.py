@@ -80,14 +80,20 @@ def dih_171_comparison(dirname,filename1,filename2):
             continue
         else:
             data = simplejson.load(open(filename+'_human_meta'+str(idx)+'.txt','rb'))
+            #code will need to be changed once true format of text file is known
+            file = open('centerfilename')
+            lines = file.readlines()
+            center = lines[3]
             for member in data[4]:
                 timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
                 channel = data[1]
-                all_peaks.append([timeval,channel])
+                all_peaks.append([timeval,channel,center])
+    list171 = []
     for peak in all_peaks:
+        if peak[1] == 171:
+            list171.append(peak)
+            
+            
         
         
-				
-		
-	
-	
+                    
