@@ -25,7 +25,7 @@ import dih_goes_getter as goes
 from datetime import datetime
 from datetime import timedelta
 import simplejson
-
+import os.path
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -72,8 +72,21 @@ def dih_max_comparison(dirname,filename):
 #
 #Name: dih_171_comparison
 #
-#def dih_171_comparison(dirname,filename1,filename2):
+def dih_171_comparison(dirname,filename1,filename2):
 	fitslist = finder.dih_dir_finder(dirname)[0]
+    all_peaks = []
+    for idx,member in enumerate(fitslist):
+        if os.path.is_file(filename1+_'human_meta'+str(idx)+'.txt') == False:
+            continue
+        else:
+            data = simplejson.load(open(filename+'_human_meta'+str(idx)+'.txt','rb'))
+            for member in data[4]:
+                timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
+                channel = data[1]
+                all_peaks.append([timeval,channel])
+    for peak in all_peaks:
+        
+        
 				
 		
 	
