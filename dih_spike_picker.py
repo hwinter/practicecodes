@@ -34,11 +34,11 @@ def dih_spike_picker(inarray):
         	crestarray = inarray[num-1:num+2]
         	numlist = range(num-1,num+2)
         elif num >= len(inarray)-2:
-        	crestarray = inarray[len(inarray)-2:len(inarray)]
-        	numlist = range(len(inarray)-2,len(inarray))
+        	crestarray = inarray[len(inarray)-4:len(inarray)]
+        	numlist = range(len(inarray)-4,len(inarray))
         elif num <= 2:
-        	crestarray = inarray[0:2]
-        	numlist = range(0,2)
+        	crestarray = inarray[0:4]
+        	numlist = range(0,4)
         else:
         	print "bad index"	
         subdiff = max(crestarray) - min(crestarray)
@@ -60,11 +60,11 @@ def dih_dip_picker(inarray):
         	cavearray = inarray[num-1:num+2]
         	numlist = range(num-1,num+2)
         elif num >= len(inarray)-2:
-        	cavearray = inarray[len(inarray)-2:len(inarray)]
-        	numlist = range(len(inarray)-2,len(inarray))
+        	cavearray = inarray[len(inarray)-4:len(inarray)]
+        	numlist = range(len(inarray)-4,len(inarray))
         elif num <= 1:
-        	cavearray = inarray[0:2]
-        	numlist = range(0,2)
+        	cavearray = inarray[0:4]
+        	numlist = range(0,4)
         else:
         	print "bad index"	
         subdiff = max(cavearray) - min(cavearray)
