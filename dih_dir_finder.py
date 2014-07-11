@@ -25,6 +25,14 @@ def dih_dir_finder(dirpath):
     fitslist = []#create list for fits files
     for list in gutslist:#populate fitslist with the appropriate files and remove ones we don't need
     	for member in list:
+    		if 'DS_Store' in member:
+    			continue
+    		if '.sav' in member:
+    			continue
+    		if '.png' in member:
+    			continue
+    		if '.mp4' in member:
+    			continue
     		if 'fits' in member:
     			fitslist.append(member)
     		if '.log' in member:
@@ -36,5 +44,9 @@ def dih_dir_finder(dirpath):
     		if '.DS_Store' in member:
     			fitslist.remove(member)
     		if '.sav' in member:
+    			fitslist.remove(member)
+    		if '.png' in member:
+    			fitslist.remove(member)
+    		if '.mp4' in member:
     			fitslist.remove(member)
     return [fitslist,ivolist]
