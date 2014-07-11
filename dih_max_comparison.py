@@ -27,6 +27,7 @@ from datetime import timedelta
 import simplejson
 import os.path
 import itertools
+import ast
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -108,13 +109,13 @@ def dih_171_comparison(dirname,filename1,filename2):
 			if data[7] == 'flag':
 				continue
 			#code will need to be changed once true format of text file is known
-			file = open(filename2)
-			lines = file.readlines()
-			center = lines[3]
+			#file = open(filename2,'r')
+			#lines = file.readlines()
+			#center = lines[3]
 			for member in data[4]:
 				timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
 				channel = data[1]
-				all_peaks.append([timeval,channel,center])
+				all_peaks.append([timeval,channel])
 	list171 = [j for j, j in enumerate(all_peaks) if j[1] == 171]
 	other_list = [j for j, j in enumerate(all_peaks) if j[1] != 171]
 	t_cusp = timedelta(seconds = 180)
@@ -122,8 +123,8 @@ def dih_171_comparison(dirname,filename1,filename2):
 	sharedlist = []
 	for idx,peak in enumerate(list171):
 		subsharedlist = [peak]
-		for member in other_list:
-			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp and peak[2][0]<member[2][0]+s_cusp and peak[2][0]>member[2][0]-s_cusp and peak[1][0]<member[1][0]+s_cusp and peak[1][0]>member[1][0]-s_cusp:    			
+		for member in other_list:#if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp and peak[2][0]<member[2][0]+s_cusp and peak[2][0]>member[2][0]-s_cusp and peak[1][0]<member[1][0]+s_cusp and peak[1][0]>member[1][0]-s_cusp:
+			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp
 				subsharedlist.append(member)
 				continue
 			else:
@@ -139,6 +140,39 @@ def dih_171_comparison(dirname,filename1,filename2):
 	simplejson.dump(sharedlist,savefile)
 	savefile.close()
 	return sharedlist
+#
+#
+#Name:dih_171_compare
+#
+#Purpose: same as dih_171_comparison
+#
+#Inputs: filename1 is a txt file where line represents the metadata for a single ivo event file
+#filename2 is a txt file containing spatial data about the ivo event
+#
+#Outputs: txt file containing a list where each sublist is a group of related peaks
+#
+#Example: list = dih_171_compare('meta.txt','spatial.txt')
+#
+#Written: 7/11/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+
+def dih_171_compare(filename1,filename2):
+	meta_file = open(filename1,'r')
+	meta_lines = meta_file.readlines()
+	#Codes to create list of centers
+	#
+	#
+	#
+	centers = []
+	for member in meta_lines:
+		member = ast.literal_eval(member)
+		if member[7] == 'flag':
+			continue
+		
+	
+	
     		
     		
 
