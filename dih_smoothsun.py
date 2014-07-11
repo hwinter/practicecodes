@@ -347,7 +347,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
 	#channel-selective smoothing
 	if fits_channel == 131:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,11,11)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
 		window = 11
 	elif fits_channel == 171:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
@@ -356,7 +356,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
 		window = 7
 	elif fits_channel == 193:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	elif fits_channel == 304:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)	
@@ -425,18 +425,18 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	#shutil.move(savename+'_'+newname+'_chi'+str(num)+'.txt','/data/george/dherman/metadata')
 	#Saving all relavant metadata/peakdata to human readable text file
 	metadatalist.remove(chi)
-	#file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
-	#simplejson.dump(metadatalist,file)
-	#file.close()
-	#shutil.move(savename+'_human_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
+	file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
+	simplejson.dump(metadatalist,file)
+	file.close()
+	shutil.move(savename+'_human_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
 	#finish up plot characteristics
 	plt.plot(x,y,'b',linewidth = 1.0)
 	plt.plot(x,ysmooth,'r',linewidth = 1.5)
 	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
 	plt.xlabel('Seconds Since'+' '+fits_date)
 	plt.ylabel('Arbitrary Flux Units')
-	#plt.savefig(newname+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
-	#shutil.move(newname+fits_date+'_'+savename+str(num)+'.ps','/data/george/dherman/sun_plots')
+	plt.savefig(newname+'_'+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
+	shutil.move(newname+'_'+fits_date+'_'+savename+str(num)+'.ps','/data/george/dherman/sun_plots')
 	return metadatalist
 #
 #
