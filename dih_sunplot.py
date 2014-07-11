@@ -18,8 +18,6 @@ import numpy as np
 #
 def dih_sunplot_data(dirname):
 	filelist = glob.glob(dirname+"/*.fits")#get files
-	print filelist
-	print len(filelist)
 	maplist = []
 	curvelist = []
 	if len(filelist)>0:
@@ -29,7 +27,6 @@ def dih_sunplot_data(dirname):
 			maplist.append(my_map)
 			sigma = np.sum(my_map)#creates lightcurve data
 			curvelist.append(sigma)
-		print curvelist
 		difflist = []
 		for map in maplist:#populate difflist with time differences to first map
 			string1 = maplist[0].date
@@ -39,7 +36,6 @@ def dih_sunplot_data(dirname):
 			deltatime = d2-d1
 			diff = deltatime.total_seconds()
 			difflist.append(diff)
-		print difflist
 		my_first_map = maplist[0]
 		datalist = [curvelist,difflist,my_first_map.date,my_first_map.measurement,my_first_map.center,maplist]#data to be sent to larger plotting regime
 		return datalist
