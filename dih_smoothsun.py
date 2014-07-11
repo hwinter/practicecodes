@@ -31,6 +31,8 @@ from scipy.stats import chisquare
 import simplejson
 import dih_boxavg as box
 import os.path
+import os
+import shutil
 
 
 
@@ -159,18 +161,28 @@ def dih_sun_plotter(dirname,savename):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
     ivo_list = directory_lists[1]
-    outerdatalist = []
-    print fits_list
+    ivos_file = open('/data/george/dherman/completed/all_completed_ivolist.txt','r')#gets already processed ivo files
+    lines_ivo = ivos_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	print "processing "+str(idx)
+    	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
+    	ivo_string = ivo_list[idx][ivo_index:]
+    	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
+    	if len(completion) > 0:
+    		print "ivo already processed"
+    		continue
     	innerdatalist = []
     	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
     	if inlist == 11 or len(inlist[0]) < 50:#handling corrupt data cases
-    		msg = ['none']
-    		outerdatalist.append(msg)
+    		file_corr = open('all_corrupted_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_corr)
+    		file_corr.write('\n')
+    		file_corr.close()
+    		file_ivo = open('all_completed_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_ivo)
+    		file_ivo.write('\n')
+    		file_ivo.close()
     		continue
-    	print len(inlist)
-    	print type(inlist)
     	fits_date = inlist[2]#datetime for first fits file in dirpath
     	fits_channel = inlist[3]#channel for first fits
     	print str(fits_channel)
@@ -181,12 +193,13 @@ def dih_sun_plotter(dirname,savename):
     	y = inlist[0] #y coordinate data
     	ycopy = y
     	innerdatalist.append(y)
-    	outerdatalist.append(innerdatalist)
     	#save each lightcurve's raw data into separate txt file
     	with open(savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
+    	shutil.move(savename+str(idx)+'.txt','/data/george/dherman/rawdata')
     	#human readable save format
     	np.savetxt(fits_date+'_'+savename+'_col'+str(idx)+'.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fits_date+' for channel '+str(fits_channel)+' created on '+time.strftime("%c"),footer = str(ivo_list[idx]))
+    	shutil.move(fits_date+'_'+savename+'_col'+str(idx)+'.txt','/data/george/dherman/rawdata')
     	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
     	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
     	#channel-selective smoothing
@@ -226,6 +239,7 @@ def dih_sun_plotter(dirname,savename):
     			relpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
     			continue	
     	maxpeaktimelist = []
+    	flagged_peaktimelist = []
     	for member in maxpeaklist:
     		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
     		timediff = timedelta(seconds = x[member])
@@ -255,16 +269,23 @@ def dih_sun_plotter(dirname,savename):
     	smooth_range = max(ysmooth)-min(ysmooth)
     	if smooth_range > max(ysmooth)*.2:
     		metadatalist.append('flag')
+    		file_corr = open('all_corrupted_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_corr)
+    		file_corr.write('\n')
+    		file_corr.close()
     	else:
     		metadatalist.append('clear')	
     	#pickling of metadata
-    	with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
-    		pickle.dump(metadatalist,fff)
-    	with open(savename+'_chi'+str(idx)+'.txt','wb') as fff:
-    		pickle.dump(chi,fff)
+    	#with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
+    		#pickle.dump(metadatalist,fff)
+    	#shutil.move(savename+'_meta'+str(idx)+'.txt','/data/george/dherman/metadata')
+    	#with open(savename+'_chi'+str(idx)+'.txt','wb') as fff:
+    		#pickle.dump(chi,fff)
+    	#shutil.move(savename+'_chi'+str(idx)+'.txt','/data/george/dherman/metadata')
     	#Saving all relavant metadata/peakdata to human readable text file
-    	file = open(savename+'_human_meta'+str(idx)+'.txt','wb')
+    	file = open(savename+'_all_human_meta.txt','a')
     	simplejson.dump(metadatalist,file)
+    	file.write('\n')
     	file.close()
     	#finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
@@ -273,9 +294,18 @@ def dih_sun_plotter(dirname,savename):
     	plt.xlabel('Seconds Since'+' '+fits_date)
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig(fits_date+'_'+savename+str(idx)+'.ps')#saves postscript file
-    	continue
-    
-	return outerdatalist
+    	shutil.move(fits_date+'_'+savename+str(idx)+'.ps','/data/george/dherman/sun_plots')
+    	file_ivo = open('all_completed_ivolist.txt','a')
+    	simplejson.dump(ivo_list[idx],file_ivo)
+    	file_ivo.write('\n')
+    	file_ivo.close()		
+    if os.isfile(savename+'_all_human_meta.txt','/data/george/dherman/metadata'):
+    	shutil.move(savename+'_all_human_meta.txt','/data/george/dherman/metadata')	
+    if os.isfile('all_completed_ivolist.txt','/data/george/dherman/metadata'):
+    	shutil.move('all_completed_ivolist.txt','/data/george/dherman/completed')
+    if os.isfile('all_corrupted_ivolist.txt','/data/george/dherman/metadata'):
+    	shutil.move('all_corrupted_ivolist.txt','/data/george/dherman/metadata')
+    return ivo_list
 
 
 #Name: dih_sun_mapper
@@ -387,22 +417,26 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	else:
 		metadatalist.append('clear')
 	#pickling of metadata
-	with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
-		pickle.dump(metadatalist,fff)
-	with open(savename+'_'+newname+'_chi'+str(num)+'.txt','wb') as fff:
-		pickle.dump(chi,fff)
+	#with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
+		#pickle.dump(metadatalist,fff)
+	#shutil.move(savename+'_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
+	#with open(savename+'_'+newname+'_chi'+str(num)+'.txt','wb') as fff:
+		#pickle.dump(chi,fff)
+	#shutil.move(savename+'_'+newname+'_chi'+str(num)+'.txt','/data/george/dherman/metadata')
 	#Saving all relavant metadata/peakdata to human readable text file
 	metadatalist.remove(chi)
-	file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
-	simplejson.dump(metadatalist,file)
-	file.close()
+	#file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
+	#simplejson.dump(metadatalist,file)
+	#file.close()
+	#shutil.move(savename+'_human_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
 	#finish up plot characteristics
 	plt.plot(x,y,'b',linewidth = 1.0)
 	plt.plot(x,ysmooth,'r',linewidth = 1.5)
 	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
 	plt.xlabel('Seconds Since'+' '+fits_date)
 	plt.ylabel('Arbitrary Flux Units')
-	plt.savefig(newname+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
+	#plt.savefig(newname+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
+	#shutil.move(newname+fits_date+'_'+savename+str(num)+'.ps','/data/george/dherman/sun_plots')
 	return metadatalist
 #
 #
@@ -412,9 +446,16 @@ def dih_sun_recurs_data_plot(dirname,savename,newname):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
 	ivo_list = directory_lists[1]
-	print len(ivo_list)
+	file_ivo = open('/data/george/dherman/completed/all_completed_ivolist.txt','a')
 	print 'here'
+	print ivo_list
+	for member in ivo_list:
+		file_ivo.write(member)
+		file_ivo.write('\n')
+	file_ivo.close()
 	file2 = open(savename+'_'+newname+'_human_meta_flagged.txt','wb')
+	file3 = open(savename+'_'+newname+'_all_human_meta.txt','wb')
+	file4 = open(savename+'_'+newname+'_human_meta_304.txt','wb')
 	list = range(len(ivo_list))
 	all_meta = []
 	for num in list:
@@ -425,10 +466,20 @@ def dih_sun_recurs_data_plot(dirname,savename,newname):
 			all_meta.append(metadatalist)
 			continue
 	for member in all_meta:
+		simplejson.dump(member,file3)
+		file3.write('\n')
+		if member[1] == 304:
+			simplejson.dump(member,file4)
+			file4.write('\n')
 		if member[7] == 'flag':
 			simplejson.dump(member,file2)
 			file2.write('\n')
 	file2.close()
+	file3.close()
+	file4.close()
+	shutil.move(savename+'_'+newname+'_human_meta_flagged.txt','/data/george/dherman/metadata')
+	shutil.move(savename+'_'+newname+'_all_human_meta.txt','/data/george/dherman/metadata')
+	shutil.move(savename+'_'+newname+'_human_meta_304.txt','/data/george/dherman/metadata')
 	return all_meta
 		
 
