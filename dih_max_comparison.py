@@ -28,6 +28,7 @@ import simplejson
 import os.path
 import itertools
 import ast
+import shutil
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -112,8 +113,8 @@ def dih_171_comparison(dirname,filename1,filename2):
 			#file = open(filename2,'r')
 			#lines = file.readlines()
 			#center = lines[3]
-			for member in data[4]:
-				timeval = datetime.strptime(member,'%Y/%m/%d %H:%M:%S.%f')
+			for guy in data[4]:
+				timeval = datetime.strptime(guy,'%Y/%m/%d %H:%M:%S.%f')
 				channel = data[1]
 				all_peaks.append([timeval,channel])
 	list171 = [j for j, j in enumerate(all_peaks) if j[1] == 171]
@@ -124,7 +125,7 @@ def dih_171_comparison(dirname,filename1,filename2):
 	for idx,peak in enumerate(list171):
 		subsharedlist = [peak]
 		for member in other_list:#if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp and peak[2][0]<member[2][0]+s_cusp and peak[2][0]>member[2][0]-s_cusp and peak[1][0]<member[1][0]+s_cusp and peak[1][0]>member[1][0]-s_cusp:
-			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp
+			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp:
 				subsharedlist.append(member)
 				continue
 			else:
@@ -158,19 +159,52 @@ def dih_171_comparison(dirname,filename1,filename2):
 #
 
 
-def dih_171_compare(filename1,filename2):
+def dih_171_compare(filename1,savename):
 	meta_file = open(filename1,'r')
 	meta_lines = meta_file.readlines()
+	print len(meta_lines)
 	#Codes to create list of centers
 	#
 	#
 	#
-	centers = []
-	for member in meta_lines:
+	#centers = []
+	all_peaks = []
+	for idx,member in enumerate(meta_lines):
 		member = ast.literal_eval(member)
+		print member
+		print idx
 		if member[7] == 'flag':
+			print 'flag'
 			continue
-		
+		for guy in member[4]:
+			timeval = datetime.strptime(guy,'%Y/%m/%d %H:%M:%S.%f')
+			channel = member[1]
+			all_peaks.append([timeval,channel])
+	list171 = [j for j, j in enumerate(all_peaks) if j[1] == 171]
+	other_list = [j for j, j in enumerate(all_peaks) if j[1] != 171]
+	print len(list171)
+	print len(other_list)
+	t_cusp = timedelta(seconds = 180)
+	sharedlist = []
+	for idx,peak in enumerate(list171):
+		subsharedlist = [peak]
+		for member in other_list:
+			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp:	
+				subsharedlist.append(member)
+				continue
+			else:
+				continue
+		sharedlist.append(subsharedlist)
+	for member in sharedlist:
+		for item in member:
+			item[0] = str(item[0])
+	with open(savename+'_pickled_related_peaks.txt','wb') as fff:
+		pickle.dump(sharedlist,fff)
+	savefile = open(savename+'_related_peaks.txt','wb')
+	simplejson.dump(sharedlist,savefile)
+	savefile.close()
+	shutil.move(savename+'_related_peaks.txt','/data/george/dherman/metadata')
+	return sharedlist	
 	
 	
     		
