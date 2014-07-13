@@ -179,12 +179,13 @@ def dih_171_compare(filename1,savename):
 		for guy in member[4]:
 			timeval = datetime.strptime(guy,'%Y/%m/%d %H:%M:%S.%f')
 			channel = member[1]
-			all_peaks.append([timeval,channel])
+			ivo = member[5]
+			all_peaks.append([timeval,channel,ivo])
 	list171 = [j for j, j in enumerate(all_peaks) if j[1] == 171]
 	other_list = [j for j, j in enumerate(all_peaks) if j[1] != 171]
 	print len(list171)
 	print len(other_list)
-	t_cusp = timedelta(seconds = 180)
+	t_cusp = timedelta(seconds = 1000)
 	sharedlist = []
 	for idx,peak in enumerate(list171):
 		subsharedlist = [peak]
