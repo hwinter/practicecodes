@@ -283,7 +283,7 @@ def dih_sun_plotter(dirname,savename):
     		#pickle.dump(chi,fff)
     	#shutil.move(savename+'_chi'+str(idx)+'.txt','/data/george/dherman/metadata')
     	#Saving all relavant metadata/peakdata to human readable text file
-    	file = open(savename+'_all_human_meta.txt','a')
+    	file = open('sun_all_human_meta.txt','a')
     	simplejson.dump(metadatalist,file)
     	file.write('\n')
     	file.close()
@@ -350,16 +350,19 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
 		window = 11
 	elif fits_channel == 171:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	elif fits_channel == 211:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
-		window = 7
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+		window = 5
 	elif fits_channel == 193:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	elif fits_channel == 304:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)	
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)	
+		window = 7
+	elif fits_channel == 335:
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	else:
 		print "Bad Channel!"	
@@ -446,13 +449,13 @@ def dih_sun_recurs_data_plot(dirname,savename,newname):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
 	ivo_list = directory_lists[1]
-	file_ivo = open('/data/george/dherman/completed/all_completed_ivolist.txt','a')
+	#file_ivo = open('/data/george/dherman/completed/all_completed_ivolist.txt','a')
 	print 'here'
 	print ivo_list
-	for member in ivo_list:
-		file_ivo.write(member)
-		file_ivo.write('\n')
-	file_ivo.close()
+	#for member in ivo_list:
+		#file_ivo.write(member)
+		#file_ivo.write('\n')
+	#file_ivo.close()
 	file2 = open(savename+'_'+newname+'_human_meta_flagged.txt','wb')
 	file3 = open(savename+'_'+newname+'_all_human_meta.txt','wb')
 	file4 = open(savename+'_'+newname+'_human_meta_304.txt','wb')
