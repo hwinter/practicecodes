@@ -53,10 +53,13 @@ def dih_hist_171_peaks(infile,savename):
 		for guy in others:
 			guy_time = datetime.strptime(guy[0],'%Y-%m-%d %H:%M:%S.%f')
 			delt = time-guy_time
-			time_diff_171.append(delt.total_seconds())
+			time_diff_171.append(-1*delt.total_seconds())
 	P.figure()
 	n, bins, patches = P.hist(time_diff_171,10, histtype = 'stepfilled')
 	P.setp(patches, 'facecolor','b','alpha',0.75)
+	P.xlabel('Time Difference to 171 peak in seconds')
+	P.ylabel('Number of Peaks')
+	P.title('Histogram of Peak Comparision to 171 Data')
 	P.savefig(savename)
 	return time_diff_171
 				
