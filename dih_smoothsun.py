@@ -63,7 +63,7 @@ def dih_kaiser_recurs(x,beta,num1,rounds):
 		continue
 	return out
 #
-#Name:dih_uberplotter
+#Name:dih_uberplotter (old file ignore this)
 #
 #Purpose:smoothing/peak-finding/plotting program for AIA data
 #
@@ -205,19 +205,19 @@ def dih_sun_plotter(dirname,savename):
     	#channel-selective smoothing
     	print "at smoothing "+str(idx)
     	if fits_channel == 131:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,11,11)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
     		window = 11
     	elif fits_channel == 171:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	elif fits_channel == 211:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,9)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	elif fits_channel == 193:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,1)
     		window = 7
     	elif fits_channel == 304:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,7)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	else:
     		print "Bad Channel!"
@@ -283,7 +283,7 @@ def dih_sun_plotter(dirname,savename):
     		#pickle.dump(chi,fff)
     	#shutil.move(savename+'_chi'+str(idx)+'.txt','/data/george/dherman/metadata')
     	#Saving all relavant metadata/peakdata to human readable text file
-    	file = open('sun_all_human_meta.txt','a')
+    	file = open(savename+'_all_human_meta.txt','a')
     	simplejson.dump(metadatalist,file)
     	file.write('\n')
     	file.close()
@@ -328,7 +328,19 @@ def dih_sun_mapper(dirname,savename):
 	return totalrawdata
 #
 #
+#Name: dih_sun_data_plot
 #
+#Purpose: plot lightcurve for data that has already been run through sunpy map maker and moved to text files
+#
+#Inputs:directory where ivo files were initially located, original savename for text files, number ivo file in dirname where desired text files came from, new savename (newname)
+#
+#Outputs: ps file for lightcurve plot, metadata about plot
+#
+#Example: gah = dih_sun_data_plot('/Volumes/Scratch/dherman/ivos','sunplots',18,'testplot')
+#
+#Written: 7/14/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+# 
 def dih_sun_data_plot(dirname,savename,num,newname):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
@@ -354,7 +366,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		window = 7
 	elif fits_channel == 211:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
-		window = 5
+		window = 7
 	elif fits_channel == 193:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
@@ -442,7 +454,17 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	shutil.move(newname+'_'+fits_date+'_'+savename+str(num)+'.ps','/data/george/dherman/sun_plots')
 	return metadatalist
 #
+#Name: dih_sun_recurs_data_plots
 #
+#Purpose: Recurses over files in dirname and performs dih_sun_data_plot for each file
+#
+#Inputs: directory containing ivo files, original savename for files, new savename for files (newname)
+#
+#Outputs: Postscript file for each ivo file, metadata about ps file
+#
+#Example: gah = dih_sun_recurs_data_plot('/Volumes/Scratch/Users/dherman/data','suncurves','test_for_smoothing')
+#
+#Written: 7/14/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
 def dih_sun_recurs_data_plot(dirname,savename,newname):
