@@ -154,7 +154,7 @@ def dih_uberplotter(dirname,savename):
 #
 #Written: 7/8/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
-#
+#Note: Form of metadata -> [Event Starting Time, Event Channel, Event Center, Relative Peaks, Primary Peak, Source Ivo File, Flagged Peaks, Corrupt: 'flag' (y) or 'clear' (n), Contains Flagged Peaks: 'peakflag' (y) or 'no_peakflag' (n)]
 
 
 def dih_sun_plotter(dirname,savename):
@@ -274,7 +274,15 @@ def dih_sun_plotter(dirname,savename):
     		file_corr.write('\n')
     		file_corr.close()
     	else:
-    		metadatalist.append('clear')	
+    		metadatalist.append('clear')
+    	if len(flagged_peaktimelist) > 0:
+    		metadatalist.append('peakflag')
+    		file_peakflag = open('all_peakflag_meta.txt','a')
+    		simplejson.dump(metadatalist,file_peakflag)
+    		file_peakflag.write('\n')
+    		file_peakflag.close()
+    	else:
+    		metadatalist.append('no_peakflag')			
     	#pickling of metadata
     	#with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
     		#pickle.dump(metadatalist,fff)
@@ -365,7 +373,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	elif fits_channel == 211:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,3)
 		window = 7
 	elif fits_channel == 193:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
@@ -387,7 +395,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		if member < window or member > (len(ysmooth)-window):
 			continue
 		else:
-			plt.plot(x[member],ysmooth[member],'yD')
+			plt.plot(x[member],ysmooth[member],'yD',markersize = 12)
 			#recreating peak times from time difference data
 			first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
 			timediff = timedelta(seconds = x[member])
@@ -410,9 +418,9 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
 	print flagged_peaklist
 	for member in real_peaklist:
-		plt.plot(x[member],ysmooth[member],'gD')
+		plt.plot(x[member],ysmooth[member],'gD',markersize = 12)
 	for member in flagged_peaklist:
-		plt.plot(x[member],ysmooth[member],'rD')
+		plt.plot(x[member],ysmooth[member],'rD',markersize = 12)
 	#creating chi-squared value
 	observed = np.array(ycopy)
 	expected = np.array(ysmooth)*np.sum(observed)
