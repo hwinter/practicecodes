@@ -307,12 +307,14 @@ def dih_sun_plotter(dirname,savename):
     	simplejson.dump(ivo_list[idx],file_ivo)
     	file_ivo.write('\n')
     	file_ivo.close()		
-    if os.isfile(savename+'_all_human_meta.txt','/data/george/dherman/metadata'):
+    if os.isfile('/home/dherman/Documents/togithub/'+savename+'_all_human_meta.txt'):
     	shutil.move(savename+'_all_human_meta.txt','/data/george/dherman/metadata')	
-    if os.isfile('all_completed_ivolist.txt','/data/george/dherman/metadata'):
+    if os.isfile('/home/dherman/Documents/togithub/'+'all_completed_ivolist.txt'):
     	shutil.move('all_completed_ivolist.txt','/data/george/dherman/completed')
-    if os.isfile('all_corrupted_ivolist.txt','/data/george/dherman/metadata'):
+    if os.isfile('/home/dherman/Documents/togithub/'+'all_corrupted_ivolist.txt'):
     	shutil.move('all_corrupted_ivolist.txt','/data/george/dherman/metadata')
+    if os.isfile('/home/dherman/Documents/togithub/'+'all_peakflag_meta.txt'):
+    	shutil.move('all_peakflag_meta.txt','/data/george/dherman/metadata')
     return ivo_list
 
 
