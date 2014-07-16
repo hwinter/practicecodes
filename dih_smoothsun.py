@@ -194,12 +194,10 @@ def dih_sun_plotter(dirname,savename):
     	ycopy = y
     	innerdatalist.append(y)
     	#save each lightcurve's raw data into separate txt file
-    	with open(savename+str(idx)+'.txt','wb') as fff:
+    	with open('/data/george/dherman/rawdata'+savename+str(idx)+'.txt','wb') as fff:
     		pickle.dump(innerdatalist,fff)
-    	shutil.move(savename+str(idx)+'.txt','/data/george/dherman/rawdata')
     	#human readable save format
-    	np.savetxt(fits_date+'_'+savename+'_col'+str(idx)+'.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+fits_date+' for channel '+str(fits_channel)+' created on '+time.strftime("%c"),footer = str(ivo_list[idx]))
-    	shutil.move(fits_date+'_'+savename+'_col'+str(idx)+'.txt','/data/george/dherman/rawdata')
+    	np.savetxt('/data/george/dherman/rawdata' + fits_date + '_' + savename + '_col' + str(idx) + '.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from ' + fits_date + ' for channel ' + str(fits_channel) + ' created on ' + time.strftime("%c"),footer = str(ivo_list[idx]))
     	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
     	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
     	#channel-selective smoothing
@@ -214,7 +212,7 @@ def dih_sun_plotter(dirname,savename):
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	elif fits_channel == 193:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,1)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	elif fits_channel == 304:
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
@@ -244,7 +242,7 @@ def dih_sun_plotter(dirname,savename):
     		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
     		timediff = timedelta(seconds = x[member])
     		peaktime = first_time+timediff
-    		if x[member] > 250 and x[member] < x[-1]-250:
+    		if x[member] > 200 and x[member] < x[-1]-200:
     			maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
     		else:
     			flagged_peaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
@@ -254,10 +252,6 @@ def dih_sun_plotter(dirname,savename):
     		plt.plot(x[member],ysmooth[member],'gD')
     	for member in flagged_peaklist:
     		plt.plot(x[member],ysmooth[member],'rD')
-    	#creating chi-squared value
-    	observed = np.array(ycopy)
-    	expected = np.array(ysmooth)*np.sum(observed)
-    	chi = chisquare(observed,expected)
     	metadatalist = []
     	metadatalist.append(fits_date)
     	metadatalist.append(fits_channel)
@@ -269,7 +263,7 @@ def dih_sun_plotter(dirname,savename):
     	smooth_range = max(ysmooth)-min(ysmooth)
     	if smooth_range > max(ysmooth)*.2:
     		metadatalist.append('flag')
-    		file_corr = open('all_corrupted_ivolist.txt','a')
+    		file_corr = open('/data/george/dherman/metadata' + 'all_corrupted_ivolist.txt','a')
     		simplejson.dump(ivo_list[idx],file_corr)
     		file_corr.write('\n')
     		file_corr.close()
@@ -277,44 +271,32 @@ def dih_sun_plotter(dirname,savename):
     		metadatalist.append('clear')
     	if len(flagged_peaktimelist) > 0:
     		metadatalist.append('peakflag')
-    		file_peakflag = open('all_peakflag_meta.txt','a')
+    		file_peakflag = open('/data/george/dherman/metadata' + 'all_peakflag_meta.txt','a')
     		simplejson.dump(metadatalist,file_peakflag)
     		file_peakflag.write('\n')
     		file_peakflag.close()
     	else:
     		metadatalist.append('no_peakflag')			
-    	#pickling of metadata
-    	#with open(savename+'_meta'+str(idx)+'.txt','wb') as fff:
-    		#pickle.dump(metadatalist,fff)
-    	#shutil.move(savename+'_meta'+str(idx)+'.txt','/data/george/dherman/metadata')
-    	#with open(savename+'_chi'+str(idx)+'.txt','wb') as fff:
-    		#pickle.dump(chi,fff)
-    	#shutil.move(savename+'_chi'+str(idx)+'.txt','/data/george/dherman/metadata')
+    	pickling of metadata
+    	with open('/data/george/dherman/metadata' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
+    		pickle.dump(metadatalist,fff)
+    
     	#Saving all relavant metadata/peakdata to human readable text file
-    	file = open(savename+'_all_human_meta.txt','a')
+    	file = open('/data/george/dherman/metadata' + savename + '_all_human_meta.txt','a')
     	simplejson.dump(metadatalist,file)
     	file.write('\n')
     	file.close()
     	#finish up plot characteristics
     	plt.plot(x,y,'b',linewidth = 1.0)
     	plt.plot(x,ysmooth,'r',linewidth = 1.5)
-    	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
-    	plt.xlabel('Seconds Since'+' '+fits_date)
+    	plt.title('Lightcurve at' + ' ' + fits_date +  ' ' + str(fits_channel) + '$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since' + ' ' + fits_date)
     	plt.ylabel('Arbitrary Flux Units')
-    	plt.savefig(fits_date+'_'+savename+str(idx)+'.ps')#saves postscript file
-    	shutil.move(fits_date+'_'+savename+str(idx)+'.ps','/data/george/dherman/sun_plots')
-    	file_ivo = open('all_completed_ivolist.txt','a')
+    	plt.savefig('/data/george/dherman/sun_plots' + fits_date + '_' + savename + str(idx) + '.ps')#saves postscript file
+    	file_ivo = open('/data/george/dherman/map_completed' + 'all_completed_ivolist.txt','a')
     	simplejson.dump(ivo_list[idx],file_ivo)
     	file_ivo.write('\n')
     	file_ivo.close()		
-    if os.isfile('/home/dherman/Documents/togithub/'+savename+'_all_human_meta.txt'):
-    	shutil.move(savename+'_all_human_meta.txt','/data/george/dherman/metadata')	
-    if os.isfile('/home/dherman/Documents/togithub/'+'all_completed_ivolist.txt'):
-    	shutil.move('all_completed_ivolist.txt','/data/george/dherman/completed')
-    if os.isfile('/home/dherman/Documents/togithub/'+'all_corrupted_ivolist.txt'):
-    	shutil.move('all_corrupted_ivolist.txt','/data/george/dherman/metadata')
-    if os.isfile('/home/dherman/Documents/togithub/'+'all_peakflag_meta.txt'):
-    	shutil.move('all_peakflag_meta.txt','/data/george/dherman/metadata')
     return ivo_list
 
 
@@ -355,7 +337,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
 	ivo_list = directory_lists[1]
-	datalist = pickle.load(open(savename+str(num)+'.txt','rb'))
+	datalist = pickle.load(open('/data/george/dherman/rawdata'+ savename + str(num) + '.txt','rb'))
 	meta_datalist = pickle.load(open(savename+'_meta'+str(num)+'.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
@@ -431,7 +413,6 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	metadatalist.append(fits_date)
 	metadatalist.append(fits_channel)
 	metadatalist.append(fits_center)
-	metadatalist.append(chi)
 	metadatalist.append(relpeaktimelist)
 	metadatalist.append(maxpeaktimelist)
 	metadatalist.append(ivo_list[num])
@@ -449,19 +430,17 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		#pickle.dump(chi,fff)
 	#shutil.move(savename+'_'+newname+'_chi'+str(num)+'.txt','/data/george/dherman/metadata')
 	#Saving all relavant metadata/peakdata to human readable text file
-	metadatalist.remove(chi)
-	file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
-	simplejson.dump(metadatalist,file)
-	file.close()
-	shutil.move(savename+'_human_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
+	#file = open(savename+'_human_'+newname+'_meta'+str(num)+'.txt','wb')
+	#simplejson.dump(metadatalist,file)
+	#file.close()
+	#shutil.move(savename+'_human_'+newname+'_meta'+str(num)+'.txt','/data/george/dherman/metadata')
 	#finish up plot characteristics
 	plt.plot(x,y,'b',linewidth = 1.0)
 	plt.plot(x,ysmooth,'r',linewidth = 1.5)
 	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
 	plt.xlabel('Seconds Since'+' '+fits_date)
 	plt.ylabel('Arbitrary Flux Units')
-	plt.savefig(newname+'_'+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
-	shutil.move(newname+'_'+fits_date+'_'+savename+str(num)+'.ps','/data/george/dherman/sun_plots')
+	plt.savefig('/data/george/dherman/sun_plots'+newname+'_'+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
 	return metadatalist
 #
 #Name: dih_sun_recurs_data_plots
@@ -477,7 +456,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 #Written: 7/14/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_sun_recurs_data_plot(dirname,savename,newname):
+def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
 	ivo_list = directory_lists[1]
@@ -488,9 +467,18 @@ def dih_sun_recurs_data_plot(dirname,savename,newname):
 		#file_ivo.write(member)
 		#file_ivo.write('\n')
 	#file_ivo.close()
-	file2 = open(savename+'_'+newname+'_human_meta_flagged.txt','wb')
-	file3 = open(savename+'_'+newname+'_all_human_meta.txt','wb')
-	file4 = open(savename+'_'+newname+'_human_meta_304.txt','wb')
+	if test == 0:
+		file2 = open('/data/george/dherman/metadata'+savename+'_'+newname+'_human_meta_corrupted.txt','a')
+		file3 = open('/data/george/dherman/metadata'+savename+'_'+newname+'_all_human_meta.txt','a')
+		file4 = open('/data/george/dherman/metadata'+savename+'_'+newname+'_human_meta_304.txt','a')
+		file5 = open('/data/george/dherman/metadata'+savename+'_'+newname+'_human_meta_peakflag.txt','a')
+	elif test == 1:
+		file2 = open('/data/george/dherman/metadata_test'+savename+'_'+newname+'_human_meta_corrupted.txt','a')
+		file3 = open('/data/george/dherman/metadata_test'+savename+'_'+newname+'_all_human_meta.txt','a')
+		file4 = open('/data/george/dherman/metadata_test'+savename+'_'+newname+'_human_meta_304.txt','a')
+		file5 = open('/data/george/dherman/metadata_test'+savename+'_'+newname+'_human_meta_peakflag.txt','a')
+	else:
+		print "Bad Test Keyword!" 
 	list = range(len(ivo_list))
 	all_meta = []
 	for num in list:
@@ -509,12 +497,10 @@ def dih_sun_recurs_data_plot(dirname,savename,newname):
 		if member[7] == 'flag':
 			simplejson.dump(member,file2)
 			file2.write('\n')
+		if member[8]	
 	file2.close()
 	file3.close()
 	file4.close()
-	shutil.move(savename+'_'+newname+'_human_meta_flagged.txt','/data/george/dherman/metadata')
-	shutil.move(savename+'_'+newname+'_all_human_meta.txt','/data/george/dherman/metadata')
-	shutil.move(savename+'_'+newname+'_human_meta_304.txt','/data/george/dherman/metadata')
 	return all_meta
 		
 
