@@ -31,14 +31,14 @@ def dih_shared_groups(metadatafile):
 	
 	
 		
-def dih_shared_groups_plot(metadatafile,savename):
-	shared_times = dih_shared_groups(metadatafile)
-	for idx,member in enumerate(shared_times):
-		for guy in member:
-			columns = grab.dih_filegrab('/data/george/dherman/rawdata/' + guy + '*.txt'
-			colors = iter(cm.rainbow(np.linspace(0,1,len(member))))
-			print columns
-		print 'here'
-	return shared_times
+#def dih_shared_groups_plot(metadatafile,savename):
+	#shared_times = dih_shared_groups(metadatafile)
+	#for idx,member in enumerate(shared_times):
+		#for guy in member:
+			#columns = grab.dih_filegrab('/data/george/dherman/rawdata/' + guy + '*.txt'
+			#colors = iter(cm.rainbow(np.linspace(0,1,len(member))))
+			#print columns
+		#print 'here'
+	#return shared_times
 					
 	
