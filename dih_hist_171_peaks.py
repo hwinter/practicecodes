@@ -36,10 +36,16 @@ import ast
 #
 #Name: dih_hist_171_peaks
 #
-#Purpose: create time difference to 171 peaks and plot histogram of results
+#Purpose: create time difference to channel peaks of choice and plot histogram of results
 #
+#Inputs: file containing information about shared peaks, savename for histogram, channel1 = channel to compare against, channel2 = channel to source other peaks from
 #
-#Notes: add titles and axis labels!
+#Outputs: histogram of time differences
+#
+#Example: gah = dih_hist_channel_peaks('shared_peaks.txt','hist.ps',193,171)
+#
+#Written: 7/17/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
 
 def dih_hist_channel_peaks(infile,savename,channel1,channel2):
 	peak_file = open(infile,'r')
