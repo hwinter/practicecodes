@@ -59,9 +59,9 @@ def dih_goes_csv_compare(time1,time2,filename):
 #
 #
 #
+#Name: dih_goes_csv_checker
 #
-#
-#
+#Needs Documentation!
 
 def dih_goes_csv_checker(filename,csvfilename):
 	file = open(filename,'r')
