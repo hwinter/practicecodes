@@ -31,6 +31,7 @@ import os.path
 import os
 import shutil
 import ast
+from dih_max_comparison import dih_event_select
 #
 #
 #
@@ -68,5 +69,54 @@ def dih_hist_channel_peaks(infile,savename,channel1,channel2):
 	P.title('Histogram of ' + str(channel1) + ' & ' + str(channel2) + ' Separations')
 	P.savefig(savename)
 	return time_diff_channel
+#
+#
+#
+#
+#
+#
+def dih_hist_events(filename1,savename,channel1,channel2):
+	uber_list = dih_event_select(filename1)
+	time_diff_channel = []
+	target_ivo = []
+	other_ivo = []
+	for member in uber_list:
+		for guy in member:
+			target = []
+			other = []
+			for dude in guy:
+				dude = list(dude)
+				if dude[1] == channel1:
+					target.append(dude)
+				if dude[1] == channel2:
+					other.append(dude)
+			if len(target) > 1:
+				target = [target[0]]
+			elif len(target) == 0:
+				continue	
+			if len(other) > 1:
+				other = [other[0]]
+			elif len(other) == 0:
+				continue
+			target_time = datetime.strptime(target[0][0],'%Y/%m/%d %H:%M:%S.%f')
+			other_time = datetime.strptime(other[0][0],'%Y/%m/%d %H:%M:%S.%f')
+			delt = other_time-target_time
+			time_diff_channel.append(delt.total_seconds())
+			target_ivo.append(target[0][2])
+			other_ivo.append(other[0][2])
+	final = [time_diff_channel,target_ivo,other_ivo]
+	final = list(set(zip(*final)))
+	final = zip(*final)
+	P.figure()
+	n, bins, patches = P.hist(list(final[0]),10, histtype = 'stepfilled')
+	P.setp(patches, 'facecolor','b','alpha',0.75)
+	P.xlabel('Time Difference between '+str(channel1)+' and ' + str(channel2) + ' peak in seconds')
+	P.ylabel('Number of Peaks')
+	P.title('Histogram of ' + str(channel1) + ' & ' + str(channel2) + ' Separations')
+	P.savefig(savename)
+		
+	return final 		
+			
+				
 				
 			
