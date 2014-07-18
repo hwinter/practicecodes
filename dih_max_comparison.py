@@ -29,6 +29,7 @@ import os.path
 import itertools
 import ast
 import shutil
+from dih_shared_plot import dih_shared_groups
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -143,23 +144,23 @@ def dih_171_comparison(dirname,filename1,filename2):
 	return sharedlist
 #
 #
-#Name:dih_171_compare
+#Name:dih_channel_compare
 #
-#Purpose: same as dih_171_comparison
+#Purpose: same as dih_171_comparison but can compare any two channels to each other
 #
 #Inputs: filename1 is a txt file where line represents the metadata for a single ivo event file
-#filename2 is a txt file containing spatial data about the ivo event
+#filename2 is a txt file containing spatial data about the ivo event,channel1 is the channel to be selected as the base of comparison, channel2 is the channel to compare against channel1
 #
 #Outputs: txt file containing a list where each sublist is a group of related peaks
 #
-#Example: list = dih_171_compare('meta.txt','spatial.txt')
+#Example: list = dih_channel_compare('meta.txt','spatial.txt')
 #
 #Written: 7/11/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
 
 
-def dih_171_compare(filename1,savename):
+def dih_channel_compare(filename1,savename,channel1,channel2):
 	meta_file = open(filename1,'r')
 	meta_lines = meta_file.readlines()
 	print len(meta_lines)
@@ -181,13 +182,13 @@ def dih_171_compare(filename1,savename):
 			channel = member[1]
 			ivo = member[5]
 			all_peaks.append([timeval,channel,ivo])
-	list171 = [j for j, j in enumerate(all_peaks) if j[1] == 171]
-	other_list = [j for j, j in enumerate(all_peaks) if j[1] != 171]
-	print len(list171)
+	list_target = [j for j, j in enumerate(all_peaks) if j[1] == channel1]
+	other_list = [j for j, j in enumerate(all_peaks) if j[1] == channel2]
+	print len(list_target)
 	print len(other_list)
 	t_cusp = timedelta(seconds = 1000)
 	sharedlist = []
-	for idx,peak in enumerate(list171):
+	for idx,peak in enumerate(list_target):
 		subsharedlist = [peak]
 		for member in other_list:
 			if peak[0]<member[0]+t_cusp and peak[0]>member[0]-t_cusp:	
@@ -201,13 +202,105 @@ def dih_171_compare(filename1,savename):
 			item[0] = str(item[0])
 	with open(savename+'_pickled_related_peaks.txt','wb') as fff:
 		pickle.dump(sharedlist,fff)
-	savefile = open(savename+'_related_peaks.txt','wb')
+	savefile = open('/data/george/dherman/metadata/'+savename+'_related_peaks.txt','wb')
 	simplejson.dump(sharedlist,savefile)
 	savefile.close()
-	shutil.move(savename+'_related_peaks.txt','/data/george/dherman/metadata')
-	return sharedlist	
+	return sharedlist
+#
+#Name: dih_event_select
+#
+#Purpose: selects primary peaks and the peaks in other channels that are closest to the primary peak
+#
+#Inputs: filename1 -> metadata
+#
+#Outputs: list of lists where each sublist contains lists of related peaks
+#
+#Example: uber_list = dih_event_select('meta.txt')
+#
+#Written:7/18/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+def dih_event_select(filename1):
+	shared_times = dih_shared_groups(filename1)
+	meta_file = open(filename1, 'r')
+	meta_lines = meta_file.readlines()
+	all_meta_datalist = []
+	for member in meta_lines:
+		member = ast.literal_eval(member)
+		all_meta_datalist.append(member)
+	event_list = []
+	for member in shared_times:
+		event = []
+		for guy in member:
+			for part in all_meta_datalist:
+				if part[0] == guy:
+					event.append(part)
+					break	
+		event_list.append(event)
+	print event_list
+	print len(event_list)	
+	uber_shared_list = []
+	for idx,member in enumerate(event_list):
+		print idx
+		primary_peaks = []
+		secondary_peaks = []
+		for guy in member:
+			if guy [7] == 'flag':
+				print 'flag'
+				continue
+			for tim in guy[3]:
+				timeval = datetime.strptime(tim,'%Y/%m/%d %H:%M:%S.%f')
+				channel = guy[1]
+				ivo = guy[5]
+				secondary_peaks.append((timeval,channel,ivo))
+			for tim in guy[4]:
+				timeval = datetime.strptime(tim,'%Y/%m/%d %H:%M:%S.%f')
+				channel = guy[1]
+				ivo = guy[5]
+				primary_peaks.append((timeval,channel,ivo))
+		all_peaks = primary_peaks + secondary_peaks
+		shared_peak_list = []
+		for peak in primary_peaks:
+			print peak	
+			peak_time = datetime.strftime(peak[0],'%Y/%m/%d %H:%M:%S.%f')
+			sub_peak_list = [(peak_time,peak[1],peak[2])]
+			compare_peaks = [j for j, j in enumerate(all_peaks) if j[1] != peak[1]]
+			compare_peaks_171 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 171]))
+			compare_peaks_131 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 131]))
+			compare_peaks_193 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 193]))
+			print compare_peaks_193
+			compare_peaks_335 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 335]))
+			compare_peaks_304 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 304]))
+			compare_peaks_211 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 211]))
+			compare_list = [compare_peaks_171,compare_peaks_131,compare_peaks_193,compare_peaks_335,compare_peaks_304,compare_peaks_211]
+			for group in compare_list:
+				compare_times = []
+				for thing in group:
+					time_diff = peak[0]-thing[0]
+					num_diff = abs(time_diff.total_seconds())
+					compare_times.append(num_diff)
+				compare_min = [i for i, j in enumerate(compare_times) if j == min(compare_times)]
+				if len(compare_min) == 1:
+					interest = list(group[compare_min[0]])
+					interest[0] = datetime.strftime(interest[0],'%Y/%m/%d %H:%M:%S.%f')
+					print interest[0:2]
+					sub_peak_list.append(tuple(interest))		
+			shared_peak_list.append(list(set(tuple(sub_peak_list))))
+		uber_shared_list.append(shared_peak_list)			
+	return uber_shared_list	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
     		
     		
 
