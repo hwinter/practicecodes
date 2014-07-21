@@ -32,6 +32,7 @@ import os
 import shutil
 import ast
 from dih_max_comparison import dih_event_select
+from dih_event_range import dih_event_range
 #
 #
 #
@@ -70,9 +71,17 @@ def dih_hist_channel_peaks(infile,savename,channel1,channel2):
 	P.savefig(savename)
 	return time_diff_channel
 #
+#Name: dih_hist_events
 #
+#Purpose: flexibly create histogram for two channels of choice displaying separation between peaks in those channels
 #
+#Inputs: filename1 -> metadata to analyze, savename -> save name for histogram, channel1 -> target channel, channel2 -> testing channel
 #
+#Outputs: histogram and final data [time differences,source ivo for channel1, source ivo for channel2]
+#
+#Example: gah = dih_hist_events('metadata.txt','hist.ps',193,131)
+#
+#Written: 7/18/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
 def dih_hist_events(filename1,savename,channel1,channel2):
