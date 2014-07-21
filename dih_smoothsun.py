@@ -276,7 +276,11 @@ def dih_sun_plotter(dirname,savename):
     		file_peakflag.write('\n')
     		file_peakflag.close()
     	else:
-    		metadatalist.append('no_peakflag')			
+    		metadatalist.append('no_peakflag')
+    	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    	fits_range = datetime.timedelta(seconds = x[-1])
+    	fits_end = fits_time+fits_range
+    	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
     	#pickling of metadata
     	with open('/data/george/dherman/metadata/' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
@@ -423,6 +427,19 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		metadatalist.append('flag')
 	else:
 		metadatalist.append('clear')
+	if len(flagged_peaktimelist) > 0:
+		metadatalist.append('peakflag')
+		#file_peakflag = open('/data/george/dherman/metadata/' + 'all_peakflag_meta.txt','a')
+		#simplejson.dump(metadatalist,file_peakflag)
+		#file_peakflag.write('\n')
+		#file_peakflag.close()
+	else:
+		metadatalist.append('no_peakflag')
+	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+	fits_range = timedelta(seconds = x[-1])
+	fits_end = fits_time+fits_range
+	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+	metadatalist.append(fits_end)	
 	#pickling of metadata
 	#with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
 		#pickle.dump(metadatalist,fff)
@@ -511,7 +528,7 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 #
 #
 		
-def dih_sun_shared_plot(file_string,savename,newname,first_time,color):
+def dih_sun_shared_plot(file_string,savename,newname,first_time):
 	raw_files = list(set(os.listdir('/data/george/dherman/rawdata')))
 	print raw_files
 	my_file = []
@@ -549,21 +566,27 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,color):
 	if fits_channel == 131:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
 		window = 11
+		color = 'b'
 	elif fits_channel == 171:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
+		color = 'y'
 	elif fits_channel == 211:
-		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,3)
 		window = 7
+		color = 'g'
 	elif fits_channel == 193:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
+		color = 'm'
 	elif fits_channel == 304:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)	
 		window = 7
+		color = 'o'
 	elif fits_channel == 335:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
+		color = 'r'
 	else:
 		print "Bad Channel!"	
 	peaklist = argrelextrema(ysmooth,np.greater)#relative max
@@ -575,7 +598,7 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,color):
 		if member < window or member > (len(ysmooth)-window):
 			continue
 		else:
-			plt.plot(x[member],ysmooth[member]/max(ysmooth),'yD',markersize = 12)
+			plt.plot(x[member],ysmooth[member]/max(ysmooth),'yD',markersize = 8)
 			continue	
 	real_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] > 250 and x[j] < x[-1]-250]
 	print maxpeaklist
@@ -583,9 +606,9 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,color):
 	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
 	print flagged_peaklist
 	for member in real_peaklist:
-		plt.plot(x[member],ysmooth[member]/max(ysmooth),'gD',markersize = 12)
+		plt.plot(x[member],ysmooth[member]/max(ysmooth),'gD',markersize = 8)
 	for member in flagged_peaklist:
-		plt.plot(x[member],ysmooth[member]/max(ysmooth),'rD',markersize = 12)
+		plt.plot(x[member],ysmooth[member]/max(ysmooth),'rD',markersize = 8)
 	#finish up plot characteristics
 	plt.plot(x,ysmooth/max(ysmooth),color = color,linewidth = 1.5,label = str(meta_datalist[1]))
 	return meta_datalist
@@ -602,12 +625,9 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname):
 		fig = plt.figure()
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
 		member_meta = []
-		colors = "bgrcmy"
-		color_index = 0
 		for guy in member:
-			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0],colors[color_index])
+			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0])
 			member_meta.append(guy_meta)
-			color_index += 1
 		plt.xlabel('Seconds Since'+' '+member[0])
 		plt.ylabel('Normalized Flux Units')
 		plt.title("Lightcurve at "+member[0]+" in all available channels",y=1.05)
