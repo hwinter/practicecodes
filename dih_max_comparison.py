@@ -30,6 +30,7 @@ import itertools
 import ast
 import shutil
 from dih_shared_plot import dih_shared_groups
+from dih_event_range import dih_event_range
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -222,6 +223,7 @@ def dih_channel_compare(filename1,savename,channel1,channel2):
 #
 
 def dih_event_select(filename1):
+	#get list of related start times
 	shared_times = dih_shared_groups(filename1)
 	meta_file = open(filename1, 'r')
 	meta_lines = meta_file.readlines()
@@ -230,6 +232,7 @@ def dih_event_select(filename1):
 		member = ast.literal_eval(member)
 		all_meta_datalist.append(member)
 	event_list = []
+	#getting full metadata for each event with time in shared_times
 	for member in shared_times:
 		event = []
 		for guy in member:
@@ -238,29 +241,36 @@ def dih_event_select(filename1):
 					event.append(part)
 					break	
 		event_list.append(event)
-	print event_list
-	print len(event_list)	
 	uber_shared_list = []
 	for idx,member in enumerate(event_list):
 		print idx
 		primary_peaks = []
 		secondary_peaks = []
+		#setting cut_off so program knows to ignore extra long data sets
+		cut_off = timedelta(seconds = dih_event_range(member))
+		print cut_off
 		for guy in member:
+			cut_off_time = datetime.strptime(guy[0],'%Y-%m-%dT%H:%M:%S.%f')+cut_off
 			if guy [7] == 'flag':
 				print 'flag'
 				continue
+			#getting relative peaks
 			for tim in guy[3]:
 				timeval = datetime.strptime(tim,'%Y/%m/%d %H:%M:%S.%f')
 				channel = guy[1]
 				ivo = guy[5]
-				secondary_peaks.append((timeval,channel,ivo))
+				if timeval < cut_off_time:
+					secondary_peaks.append((timeval,channel,ivo))
+			#getting primary peaks
 			for tim in guy[4]:
 				timeval = datetime.strptime(tim,'%Y/%m/%d %H:%M:%S.%f')
 				channel = guy[1]
 				ivo = guy[5]
-				primary_peaks.append((timeval,channel,ivo))
+				if timeval < cut_off_time:
+					primary_peaks.append((timeval,channel,ivo))
 		all_peaks = primary_peaks + secondary_peaks
 		shared_peak_list = []
+		#comparing primary peaks to all other peaks in other channels
 		for peak in primary_peaks:
 			print peak	
 			peak_time = datetime.strftime(peak[0],'%Y/%m/%d %H:%M:%S.%f')
@@ -269,7 +279,6 @@ def dih_event_select(filename1):
 			compare_peaks_171 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 171]))
 			compare_peaks_131 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 131]))
 			compare_peaks_193 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 193]))
-			print compare_peaks_193
 			compare_peaks_335 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 335]))
 			compare_peaks_304 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 304]))
 			compare_peaks_211 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 211]))
@@ -284,7 +293,7 @@ def dih_event_select(filename1):
 				if len(compare_min) == 1:
 					interest = list(group[compare_min[0]])
 					interest[0] = datetime.strftime(interest[0],'%Y/%m/%d %H:%M:%S.%f')
-					print interest[0:2]
+					print interest
 					sub_peak_list.append(tuple(interest))		
 			shared_peak_list.append(list(set(tuple(sub_peak_list))))
 		uber_shared_list.append(shared_peak_list)			
