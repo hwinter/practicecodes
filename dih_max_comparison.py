@@ -268,10 +268,24 @@ def dih_event_select(filename1):
 				ivo = guy[5]
 				if timeval < cut_off_time:
 					primary_peaks.append((timeval,channel,ivo))
-		all_peaks = primary_peaks + secondary_peaks
 		shared_peak_list = []
+		#Attempt at removing extra events in every channel (needs to be refined most likely)
+		primary_171 = [j for j, j in enumerate(primary_peaks) if j[1] = 171]
+		primary_131 = [j for j, j in enumerate(primary_peaks) if j[1] = 131]
+		primary_211 = [j for j, j in enumerate(primary_peaks) if j[1] = 211]
+		primary_304 = [j for j, j in enumerate(primary_peaks) if j[1] = 304]
+		primary_335 = [j for j, j in enumerate(primary_peaks) if j[1] = 335]
+		primary_193 = [j for j, j in enumerate(primary_peaks) if j[1] = 193]
+		primary_no_copy_peaks = []
+		primary_no_copy_peaks.append(primary_171[0])
+		primary_no_copy_peaks.append(primary_131[0])
+		primary_no_copy_peaks.append(primary_211[0])
+		primary_no_copy_peaks.append(primary_304[0])
+		primary_no_copy_peaks.append(primary_335[0])
+		primary_no_copy_peaks.append(primary_193[0])
+		all_peaks = primary_no_copy_peaks + secondary_peaks
 		#comparing primary peaks to all other peaks in other channels
-		for peak in primary_peaks:
+		for peak in primary_no_copy_peaks:
 			print peak	
 			peak_time = datetime.strftime(peak[0],'%Y/%m/%d %H:%M:%S.%f')
 			sub_peak_list = [(peak_time,peak[1],peak[2])]
