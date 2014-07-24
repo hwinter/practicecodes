@@ -85,9 +85,12 @@ def dih_hist_channel_peaks(infile,savename,channel1,channel2):
 #
 #
 def dih_hist_events(filename1,savename,channel1,channel2):
+	#get event sets
 	uber_list = dih_event_select(filename1)
 	time_diff_channel = []
 	target_ivo = []
+	target_time_list = []
+	other_time_list = []
 	other_ivo = []
 	for member in uber_list:
 		for guy in member:
@@ -99,6 +102,7 @@ def dih_hist_events(filename1,savename,channel1,channel2):
 					target.append(dude)
 				if dude[1] == channel2:
 					other.append(dude)
+			#making sure lists are correct sizes
 			if len(target) > 1:
 				target = [target[0]]
 			elif len(target) == 0:
@@ -113,11 +117,21 @@ def dih_hist_events(filename1,savename,channel1,channel2):
 			time_diff_channel.append(delt.total_seconds())
 			target_ivo.append(target[0][2])
 			other_ivo.append(other[0][2])
-	final = [time_diff_channel,target_ivo,other_ivo]
+			target_time_list.append(target[0][0])
+			other_time_list.append(other[0][0])
+	final = [time_diff_channel,target_ivo,other_ivo,target_time_list,other_time_list]
 	final = list(set(zip(*final)))
 	final = zip(*final)
+	if len(time_diff_channel) == 0:
+		return [channel1,channel2,'no matches']
+	final.append(channel1)
+	final.append(channel2)
 	P.figure()
+	print final
+	print 'here'
 	n, bins, patches = P.hist(list(final[0]),10, histtype = 'stepfilled')
+	final.append(tuple(n))
+	final.append(tuple(bins))
 	P.setp(patches, 'facecolor','b','alpha',0.75)
 	P.xlabel('Time Difference between '+str(channel1)+' and ' + str(channel2) + ' peak in seconds')
 	P.ylabel('Number of Peaks')
