@@ -209,7 +209,7 @@ def dih_sun_plotter(dirname,savename):
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
     	elif fits_channel == 211:
-    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,3)
     		window = 7
     	elif fits_channel == 193:
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
@@ -465,7 +465,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 #
 #Purpose: Recurses over files in dirname and performs dih_sun_data_plot for each file
 #
-#Inputs: directory containing ivo files, original savename for files, new savename for files (newname)
+#Inputs: directory containing ivo files, original savename for files, new savename for files (newname), set test to be True to direct files to test directories
 #
 #Outputs: Postscript file for each ivo file, metadata about ps file
 #
@@ -523,12 +523,12 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 	file4.close()
 	file5.close()
 	return all_meta
-#
+
 #
 #
 #
 		
-def dih_sun_shared_plot(file_string,savename,newname,first_time):
+def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	raw_files = list(set(os.listdir('/data/george/dherman/rawdata')))
 	print raw_files
 	my_file = []
@@ -537,7 +537,10 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time):
 			my_file.append(file)
 	print my_file		
 	datalist = zip(*dih_filegrab('/data/george/dherman/rawdata/' + my_file[0]))
-	meta_datalist_file = open('/data/george/dherman/metadata/' + savename + '_peakcom_all_human_meta.txt','r')
+	if test == 1:
+		meta_datalist_file = open('/data/george/dherman/metadata_test/' + savename+'_'+ newname +'_all_human_meta.txt','r')
+	elif test == 0:
+		meta_datalist_file = open('/data/george/dherman/metadata/' + savename+'_'+ newname +'_all_human_meta.txt','r')	
 	meta_datalist_lines = meta_datalist_file.readlines()
 	all_meta_datalist = []
 	for member in meta_datalist_lines:
@@ -617,7 +620,7 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time):
 #
 #
 #
-def dih_sun_recurs_shared_plot(metadatafile,savename,newname):
+def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 	shared_times = dih_shared_groups(metadatafile)
 	total_meta = []
 	for idx,member in enumerate(shared_times):
@@ -626,14 +629,14 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname):
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
 		member_meta = []
 		for guy in member:
-			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0])
+			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0],test)
 			member_meta.append(guy_meta)
 		plt.xlabel('Seconds Since'+' '+member[0])
 		plt.ylabel('Normalized Flux Units')
 		plt.title("Lightcurve at "+member[0]+" in all available channels",y=1.05)
 		#plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=2, ncol= len(member), mode="expand", borderaxespad=0.)
 		plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-		plt.savefig('/data/george/dherman/sun_plots/'+newname+'_'+member[0]+'.ps')
+		plt.savefig('/data/george/dherman/sun_plots/'+newname+'_shared_plot_'+member[0]+'.ps')
 		total_meta.append(member_meta)
 	return total_meta
 		
