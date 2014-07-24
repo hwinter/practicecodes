@@ -270,19 +270,14 @@ def dih_event_select(filename1):
 					primary_peaks.append((timeval,channel,ivo))
 		shared_peak_list = []
 		#Attempt at removing extra events in every channel (needs to be refined most likely)
-		primary_171 = [j for j, j in enumerate(primary_peaks) if j[1] = 171]
-		primary_131 = [j for j, j in enumerate(primary_peaks) if j[1] = 131]
-		primary_211 = [j for j, j in enumerate(primary_peaks) if j[1] = 211]
-		primary_304 = [j for j, j in enumerate(primary_peaks) if j[1] = 304]
-		primary_335 = [j for j, j in enumerate(primary_peaks) if j[1] = 335]
-		primary_193 = [j for j, j in enumerate(primary_peaks) if j[1] = 193]
+		channel_list = [171,131,211,304,335,193]
 		primary_no_copy_peaks = []
-		primary_no_copy_peaks.append(primary_171[0])
-		primary_no_copy_peaks.append(primary_131[0])
-		primary_no_copy_peaks.append(primary_211[0])
-		primary_no_copy_peaks.append(primary_304[0])
-		primary_no_copy_peaks.append(primary_335[0])
-		primary_no_copy_peaks.append(primary_193[0])
+		for idx,channel in enumerate(channel_list):
+			channel_group = [j for j, j in enumerate(primary_peaks) if j[1] == channel]
+			if len(channel_group) > 0:
+				primary_no_copy_peaks.append(channel_group[0])
+			else:
+				continue
 		all_peaks = primary_no_copy_peaks + secondary_peaks
 		#comparing primary peaks to all other peaks in other channels
 		for peak in primary_no_copy_peaks:
@@ -290,13 +285,10 @@ def dih_event_select(filename1):
 			peak_time = datetime.strftime(peak[0],'%Y/%m/%d %H:%M:%S.%f')
 			sub_peak_list = [(peak_time,peak[1],peak[2])]
 			compare_peaks = [j for j, j in enumerate(all_peaks) if j[1] != peak[1]]
-			compare_peaks_171 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 171]))
-			compare_peaks_131 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 131]))
-			compare_peaks_193 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 193]))
-			compare_peaks_335 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 335]))
-			compare_peaks_304 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 304]))
-			compare_peaks_211 = list(set([j for j, j in enumerate(compare_peaks) if j[1] == 211]))
-			compare_list = [compare_peaks_171,compare_peaks_131,compare_peaks_193,compare_peaks_335,compare_peaks_304,compare_peaks_211]
+			compare_list = []
+			for channel in channel_list:
+				compare_peaks_by_channel = list(set([j for j, j in enumerate(compare_peaks) if j[1] == channel]))
+				compare_list.append(compare_peaks_by_channel)
 			for group in compare_list:
 				compare_times = []
 				for thing in group:
