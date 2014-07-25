@@ -26,10 +26,13 @@ from dih_hist_171_peaks import dih_hist_events
 # 
 
 def dih_data_routine1(dirname,savename):
+	#creates lightcurves, metadata, rawdata for ivo files
 	ivo_list = dih_sun_plotter(dirname,savename)
+	#creates shared_plots
 	total_shared_meta = dih_sun_recurs_shared_plot('/data/george/dherman/metadata/'+ savename+'_all_human_meta.txt',savename,'shared_plot')
 	channel_list = [131,171,211,304,335,193]
 	all_hist_info = []
+	#creates histograms for all channel combinations
 	for channel in channel_list:
 		other_channel_list = [j for j, j in enumerate(channel_list) if j != channel]
 		for member in other_channel_list:
@@ -58,7 +61,9 @@ def dih_data_routine1(dirname,savename):
 
 
 def dih_data_routine2(dirname,savename,newname,test):
+	#creates lightcurves,metadata from already created rawdata
 	all_meta = dih_sun_recurs_data_plot(dirname,savename,newname,test)
+	#directs shared_plot files to directories based on keyword value
 	if test == 1:
 		total_shared_meta = dih_sun_recurs_shared_plot('/data/george/dherman/metadata_test/'+ savename + '_' + newname + '_all_human_meta.txt',savename,newname,test)
 	elif test == 0:
@@ -67,6 +72,7 @@ def dih_data_routine2(dirname,savename,newname,test):
 		print 'Bad Keyword!'
 	channel_list = [131,171,211,304,335,193]
 	all_hist_info = []
+	#creates histograms for all channel combinations
 	for channel in channel_list:
 		other_channel_list = [j for j, j in enumerate(channel_list) if j != channel]
 		for member in other_channel_list:
