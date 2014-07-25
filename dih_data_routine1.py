@@ -13,6 +13,17 @@ from dih_hist_171_peaks import dih_hist_events
 #
 #Name: dih_data_routine1()
 #
+#Purpose: Performs sunpy mapping, plotting of individual light curves, plotting of cotemporal (shared) light curves, creation of histograms depicting time separation of channels for the same event
+#
+#Inputs: directory containing ivo files (dirname), over-arching savename to tie all data/metadata together
+#
+#Outputs: txt files with rawdata,metadata for each lightcurve; plots of lightcurves (shared and individual); histograms of channel separation and histogram data txt files
+#
+#Example: gah = dih_data_routine1('/data/george/dherman/ivos','sun_block')
+#
+#Written: 7/24/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+# 
 
 def dih_data_routine1(dirname,savename):
 	ivo_list = dih_sun_plotter(dirname,savename)
@@ -33,6 +44,18 @@ def dih_data_routine1(dirname,savename):
 #
 #Name:dih_data_routine2()
 #
+#Purpose: Does same work as routine1 but with rawdata already created (no sunpy mapping necessary)
+#
+#Inputs: original directory containing ivos (dirname), original over-arching savename, additional savestring (newname), test == 1 sends data to test directories in george
+#
+#Outputs: txt files with rawdata,metadata; lightcurves, histograms (same as routine1)
+#
+#Example: gah = dih_data_routine2('/data/george/dherman/ivos','sun_block','test_six',1)
+#
+#Written 7/24/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
 
 def dih_data_routine2(dirname,savename,newname,test):
 	all_meta = dih_sun_recurs_data_plot(dirname,savename,newname,test)
