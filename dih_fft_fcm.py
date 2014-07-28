@@ -1,0 +1,66 @@
+import os  
+import glob 
+import datetime
+import time
+import shutil
+import sys
+import re
+import subprocess
+import multiprocessing as mp
+import scipy
+from scipy.io.idl import readsav
+import scipy.ndimage as image
+import sunpy
+import sunpy.map
+import numpy as np
+import pickle
+###########################################################################
+###########################################################################
+def dih_get_event_bounding_box(ev):
+    """
+    extract the coordinates, in arcseconds from the event file.
+    
+    Parameters:
+    ==========
+    ev: event object
+
+    Output:
+    ==========
+    bbc: Bounding box coordinates [x1, y1, x2, y2]
+    """
+    bbc=[float(ev.event.BOUNDBOX_C1LL[0]),float(ev.event.BOUNDBOX_C2LL[0] ),
+         float(ev.event.BOUNDBOX_C1UR[0]),float(ev.event.BOUNDBOX_C2UR[0] )]
+         #print('bbc: ', bbc)
+    return bbc
+###########################################################################
+###########################################################################
+def dih_get_cropped_map(ev, file_list):
+    """
+    
+    
+    Parameters:
+    ==========
+    ev: event object
+    file_list: List of fits files to restore
+
+    Output:
+    ==========
+    out_map_list: A list of map objects containing cropped images based of the
+             event bounding box.
+    """
+  
+    #Get the coordinates of the bounding box in arcsec
+    bbc= dih_get_event_bounding_box(ev)
+    out_map_list=[]
+    for file in file_list:
+    	#Changed after Sunpy V0.5.0
+        #temp_map= sunpy.make_map(file)
+        temp_map=sunpy.map.Map(file)
+        temp_map=temp_map.submap([bbc[0], bbc[2]],[bbc[1], bbc[3]])
+        out_map_list.append(temp_map)
+        file_AIA_index = file.find('AIA')
+        file_AIA_string = file[file_AIA_index:-5]       
+        temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_cropped.fits', filetype='fits')
+    print("out_map_list",len(out_map_list))
+    return out_map_list
+###########################################################################
