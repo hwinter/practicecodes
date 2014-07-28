@@ -4,6 +4,7 @@ import glob
 from sunpy.image.coalignment import mapcube_coalign_by_match_template
 from datetime import datetime
 import numpy as np
+from dih_fft_fcm import dih_get_cropped_map
 #
 #Name:dih_sunplot_data
 #
@@ -41,6 +42,52 @@ def dih_sunplot_data(dirname):
 		return datalist
 	else:
 		return 11
+#
+#
+#
+#
+#
+#
+#
+#
+#Name:dih_sunplot_cropped_data
+#
+#Purpose:creates (time,flux) = (x,y) data, and also gives data,channel and center of first fits file in a given directory
+#
+#Inputs: directory with aia fits files (dirname), event file (IDL .sav file that has been opened using scipy.io.idl.readsav)
+#
+#Outputs: list of:list of flux data points (curvelist), list of times since first AIA image in directory (diff list), time of first image, channel of first image 
+#center of first image 
+#
+#Written: 7/28/14 Dan Herman	daniel.herman@cfa.harvard.edu
+#
+def dih_sunplot_cropped_data(ev,dirname):
+	filelist = glob.glob(dirname+"/*.fits")#get files
+	cropped_maplist = dih_get_cropped_map(ev,filelist)#make cropped map list
+	curvelist = []
+	difflist = []
+	if len(filelist)>0:
+		for member in cropped_maplist:
+			sigma = np.sum(member)#creates lightcurve data
+			curvelist.append(sigma)
+			string1 = maplist[0].date
+			string2 = member.date
+			d1 = datetime.strptime(string1, '%Y-%m-%dT%H:%M:%S.%f')
+			d2 = datetime.strptime(string2, '%Y-%m-%dT%H:%M:%S.%f')
+			deltatime = d2-d1
+			diff = deltatime.total_seconds()
+			difflist.append(diff)
+		my_first_map = cropped_maplist[0]
+		datalist = [curvelist,difflist,my_first_map.date,my_first_map.measurement,my_first_map.center,maplist]#data to be sent to larger plotting regime
+		return datalist
+	else:
+		return 11
+
+
+#
+#
+#
+#
 #
 #
 #Name:dih_sunmap_data
