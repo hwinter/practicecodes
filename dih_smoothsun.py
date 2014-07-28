@@ -639,6 +639,155 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 		plt.savefig('/data/george/dherman/sun_plots/'+newname+'_shared_plot_'+member[0]+'.ps')
 		total_meta.append(member_meta)
 	return total_meta
+#
+#
+#Name: dih_sun_cropped_plotter
+#
+def dih_sun_cropped_plotter(dirname,savename):
+    directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+    fits_list = directory_lists[0]
+    ivo_list = directory_lists[1]
+    ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
+    lines_ivo = ivos_file.readlines()
+    for idx,dirpath in enumerate(fits_list):
+    	print "processing "+str(idx)
+    	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
+    	ivo_string = ivo_list[idx][ivo_index:]
+    	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
+    	if len(completion) > 0:
+    		print "ivo already processed"
+    		continue
+    	innerdatalist = []
+    	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
+    	if inlist == 11 or len(inlist[0]) < 50:#handling corrupt data cases
+    		file_corr = open('/data/george/dherman/metadata/all_corrupted_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_corr)
+    		file_corr.write('\n')
+    		file_corr.close()
+    		file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_ivo)
+    		file_ivo.write('\n')
+    		file_ivo.close()
+    		continue
+    	fits_date = inlist[2]#datetime for first fits file in dirpath
+    	fits_channel = inlist[3]#channel for first fits
+    	print str(fits_channel)
+    	fits_center = inlist[4]#center of first fits
+    	colors = iter(cm.rainbow(np.linspace(0,1,len(inlist[0])))) #creates color table
+    	x = inlist[1] #x coordinate data
+    	innerdatalist.append(x)
+    	y = inlist[0] #y coordinate data
+    	ycopy = y
+    	innerdatalist.append(y)
+    	#save each lightcurve's raw data into separate txt file
+    	with open('/data/george/dherman/rawdata/'+savename+str(idx)+'.txt','wb') as fff:
+    		pickle.dump(innerdatalist,fff)
+    	#human readable save format
+    	np.savetxt('/data/george/dherman/rawdata/' + fits_date + '_' + savename + '_col' + str(idx) + '.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from ' + fits_date + ' for channel ' + str(fits_channel) + ' created on ' + time.strftime("%c"),footer = str(ivo_list[idx]))
+    	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
+    	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
+    	#channel-selective smoothing
+    	print "at smoothing "+str(idx)
+    	if fits_channel == 131:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
+    		window = 11
+    	elif fits_channel == 171:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+    		window = 7
+    	elif fits_channel == 211:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,3)
+    		window = 7
+    	elif fits_channel == 193:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+    		window = 7
+    	elif fits_channel == 304:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+    		window = 7
+    	else:
+    		print "Bad Channel!"
+    		continue	
+    	peaklist = argrelextrema(ysmooth,np.greater)#relative max
+    	peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
+    	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
+    	plt.figure()
+    	relpeaktimelist = []
+    	for member in peaklist[0]:
+    		if member < window or member > (len(ysmooth)-window):
+    			continue
+    		else:
+    			plt.plot(x[member],ysmooth[member],'yD')
+    			#recreating peak times from time difference data
+    			first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    			timediff = timedelta(seconds = x[member])
+    			peaktime = first_time+timediff
+    			relpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    			continue	
+    	maxpeaktimelist = []
+    	flagged_peaktimelist = []
+    	for member in maxpeaklist:
+    		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    		timediff = timedelta(seconds = x[member])
+    		peaktime = first_time+timediff
+    		if x[member] > 200 and x[member] < x[-1]-200:
+    			maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    		else:
+    			flagged_peaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
+    	real_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] > 250 and x[j] < x[-1]-250]
+    	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
+    	for member in real_peaklist:
+    		plt.plot(x[member],ysmooth[member],'gD')
+    	for member in flagged_peaklist:
+    		plt.plot(x[member],ysmooth[member],'rD')
+    	metadatalist = []
+    	metadatalist.append(fits_date)
+    	metadatalist.append(fits_channel)
+    	metadatalist.append(fits_center)
+    	metadatalist.append(relpeaktimelist)
+    	metadatalist.append(maxpeaktimelist)
+    	metadatalist.append(ivo_list[idx])
+    	metadatalist.append(flagged_peaktimelist)
+    	smooth_range = max(ysmooth)-min(ysmooth)
+    	if smooth_range > max(ysmooth)*.2:
+    		metadatalist.append('flag')
+    		file_corr = open('/data/george/dherman/metadata/' + 'all_corrupted_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_corr)
+    		file_corr.write('\n')
+    		file_corr.close()
+    	else:
+    		metadatalist.append('clear')
+    	if len(flagged_peaktimelist) > 0:
+    		metadatalist.append('peakflag')
+    		file_peakflag = open('/data/george/dherman/metadata/' + 'all_peakflag_meta.txt','a')
+    		simplejson.dump(metadatalist,file_peakflag)
+    		file_peakflag.write('\n')
+    		file_peakflag.close()
+    	else:
+    		metadatalist.append('no_peakflag')
+    	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    	fits_range = datetime.timedelta(seconds = x[-1])
+    	fits_end = fits_time+fits_range
+    	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+    	#pickling of metadata
+    	with open('/data/george/dherman/metadata/' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
+    		pickle.dump(metadatalist,fff)
+    
+    	#Saving all relavant metadata/peakdata to human readable text file
+    	file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta.txt','a')
+    	simplejson.dump(metadatalist,file)
+    	file.write('\n')
+    	file.close()
+    	#finish up plot characteristics
+    	plt.plot(x,y,'b',linewidth = 1.0)
+    	plt.plot(x,ysmooth,'r',linewidth = 1.5)
+    	plt.title('Lightcurve at' + ' ' + fits_date +  ' ' + str(fits_channel) + '$\AA$',y=1.07)
+    	plt.xlabel('Seconds Since' + ' ' + fits_date)
+    	plt.ylabel('Arbitrary Flux Units')
+    	plt.savefig('/data/george/dherman/sun_plots/' + fits_date + '_' + savename + str(idx) + '.ps')#saves postscript file
+    	file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
+    	simplejson.dump(ivo_list[idx],file_ivo)
+    	file_ivo.write('\n')
+    	file_ivo.close()		
+    return ivo_list
 		
 		
 		
