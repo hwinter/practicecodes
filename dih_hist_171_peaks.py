@@ -92,6 +92,7 @@ def dih_hist_events(filename1,savename,channel1,channel2):
 	target_time_list = []
 	other_time_list = []
 	other_ivo = []
+	outlier_list = []
 	for member in uber_list:
 		for guy in member:
 			target = []
@@ -119,6 +120,9 @@ def dih_hist_events(filename1,savename,channel1,channel2):
 			other_ivo.append(other[0][2])
 			target_time_list.append(target[0][0])
 			other_time_list.append(other[0][0])
+			if abs(delt.total_seconds()) > 500:
+				outlier_data = (delt.total_seconds,target[0][2],other[0][2],target[0][0],other[0][2])
+				outlier_list.append(outlier_data)
 	final = [time_diff_channel,target_ivo,other_ivo,target_time_list,other_time_list]
 	final = list(set(zip(*final)))
 	final = zip(*final)
@@ -126,6 +130,7 @@ def dih_hist_events(filename1,savename,channel1,channel2):
 		return [channel1,channel2,'no matches']
 	final.append(channel1)
 	final.append(channel2)
+	final.append(outlier_list)
 	P.figure()
 	print final
 	print 'here'
