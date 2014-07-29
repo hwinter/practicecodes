@@ -7,18 +7,30 @@ from datetime import timedelta
 import dih_tableread as grab
 import matplotlib.cm as cm
 #
+#Name: dih_shared_groups
+#
+#Purpose: places all metadata from events in a text file into groups based on common start time
+#
+#Inputs: text file containing meta data in the form of lists
+#
+#Outputs: list of list of times that start within 2 minutes of each other
+#
+#Example: shared_times = dih_shared_group('meta.txt')
+#
+#Written:7/16/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-#
-#
+
 def dih_shared_groups(metadatafile):
 	working_file = open(metadatafile,'r')
 	working_lines = working_file.readlines()
 	events = []
+	#Turn strings into lists
 	for idx,member in enumerate(working_lines):
 		member = ast.literal_eval(member)
 		events.append(member)
 	shared_times = []
+	#Compare times to see which ones are within 2 minutes of each other
 	for idx,member in enumerate(events):
 		print type(member)
 		subshared_events = [j for j, j in enumerate(events) if abs((datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%S.%f')-datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')).total_seconds()) < 120]
