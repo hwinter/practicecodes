@@ -16,6 +16,24 @@ import numpy as np
 import pickle
 ###########################################################################
 ###########################################################################
+def dih_get_event_peak_time(ev):
+	"""
+	extract the peak time from the event file
+	
+	Parameters:
+	==========
+	ev: event object
+	
+	Output:
+	==========
+	peak_time: event peak time (string format)
+	"""
+	peak_time = ev.event.EVENT_PEAKTIME[0]
+	start_time = ev.event.EVENT_STARTTIME[0]
+	end_time = ev.event.EVENT_ENDTIME[0]
+	return [peak_time,start_time,end_time]
+###########################################################################
+###########################################################################
 def dih_get_event_bounding_box(ev):
     """
     extract the coordinates, in arcseconds from the event file.
@@ -34,7 +52,7 @@ def dih_get_event_bounding_box(ev):
     return bbc
 ###########################################################################
 ###########################################################################
-def dih_get_cropped_map(ev, file_list):
+def dih_get_cropped_map(ev, file_list,savename):
     """
     
     
@@ -52,7 +70,8 @@ def dih_get_cropped_map(ev, file_list):
     #Get the coordinates of the bounding box in arcsec
     bbc= dih_get_event_bounding_box(ev)
     out_map_list=[]
-    for file in file_list:
+    for idx,file in enumerate(file_list):
+    	print "Creating cropped map " + str(idx)
     	#Changed after Sunpy V0.5.0
         #temp_map= sunpy.make_map(file)
         temp_map=sunpy.map.Map(file)
@@ -60,7 +79,7 @@ def dih_get_cropped_map(ev, file_list):
         out_map_list.append(temp_map)
         file_AIA_index = file.find('AIA')
         file_AIA_string = file[file_AIA_index:-5]       
-        temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_cropped.fits', filetype='fits')
+        temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_cropped.fits', filetype='fits')
     print("out_map_list",len(out_map_list))
     return out_map_list
 ###########################################################################
