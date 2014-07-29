@@ -35,7 +35,9 @@ import os
 import shutil
 from dih_shared_plot import dih_shared_groups
 import ast
-
+from scipy.io.idl import readsav
+import dih_fft_fcm as fcm
+from dih_goes_csv_reader import dih_goes_csv_checker_event_files
 
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
@@ -461,7 +463,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	plt.savefig('/data/george/dherman/sun_plots/'+newname+'_'+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
 	return metadatalist
 #
-#Name: dih_sun_recurs_data_plots
+#Name: dih_sun_recurs_data_plot
 #
 #Purpose: Recurses over files in dirname and performs dih_sun_data_plot for each file
 #
@@ -643,6 +645,11 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 #
 #Name: dih_sun_cropped_plotter
 #
+#Purpose: same as dih_sun_plotter but also focuses in on event bounding box portion of the sun and saves the bounding box information
+#
+#Inputs: dirname = directory containing ivo files, savename = uber string to tie all saved files together
+#
+#Outputs:
 def dih_sun_cropped_plotter(dirname,savename):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
@@ -658,7 +665,11 @@ def dih_sun_cropped_plotter(dirname,savename):
     		print "ivo already processed"
     		continue
     	innerdatalist = []
-    	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
+    	ev = readsav(ivo_list[idx]+'/'+ivo_string+'.sav')
+    	bounding_box = fcm.dih_get_event_bounding_box(ev)
+    	ev_peak_time = fcm.dih_get_event_peak_time(ev)
+    	goes_events = dih_goes_csv_checker_event_files(ev,'/home/dherman/Documents/all_event_2.csv')
+    	inlist = datum.dih_sunplot_cropped_data(ev,dirpath,savename)#gets data and metadata
     	if inlist == 11 or len(inlist[0]) < 50:#handling corrupt data cases
     		file_corr = open('/data/george/dherman/metadata/all_corrupted_ivolist.txt','a')
     		simplejson.dump(ivo_list[idx],file_corr)
@@ -763,10 +774,14 @@ def dih_sun_cropped_plotter(dirname,savename):
     		file_peakflag.close()
     	else:
     		metadatalist.append('no_peakflag')
+    	metadatalist.append(bounding_box)
+    	metadatalist.append(ev_peak_time)
+    	metadatalist.append(goes_events)
     	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
-    	fits_range = datetime.timedelta(seconds = x[-1])
+    	fits_range = timedelta(seconds = x[-1])
     	fits_end = fits_time+fits_range
-    	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+    	fits_end_time = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+    	metadatalist.append(fits_end_time)
     	#pickling of metadata
     	with open('/data/george/dherman/metadata/' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
