@@ -31,6 +31,7 @@ import ast
 import shutil
 from dih_shared_plot import dih_shared_groups
 from dih_event_range import dih_event_range
+from dih_ev_peak_compare import dih_ev_peak_compare
 #Name: dih_max_comparison
 #
 #Purpose: finds absolute peaks in different channels that correspond to each other temporally
@@ -304,8 +305,67 @@ def dih_event_select(filename1):
 			shared_peak_list.append(list(set(tuple(sub_peak_list))))
 		uber_shared_list.append(shared_peak_list)			
 	return uber_shared_list	
-	
-	
+#
+#Name: dih_event_crop_select
+#
+#Purpose: selects primary peaks and the peaks in other channels that are closest to the primary peak from original event file
+#
+#Inputs: filename1 -> file containing metadata created by dih_sun_cropped_plotter (or equivalent program)
+#
+#Outputs: list of lists where each sublist contains lists of related peaks
+#
+#Example: uber_list = dih_event_select('meta.txt')
+#
+#Written:7/29/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+def dih_event_crop_select(filename1):
+	#get list of related start times
+	shared_times = dih_shared_groups(filename1)
+	meta_file = open(filename1, 'r')
+	meta_lines = meta_file.readlines()
+	all_meta_datalist = []
+	for member in meta_lines:
+		member = ast.literal_eval(member)
+		all_meta_datalist.append(member)
+	event_list = []
+	#getting full metadata for each event with time in shared_times
+	for member in shared_times:
+		event = []
+		for guy in member:
+			for part in all_meta_datalist:
+				if part[0] == guy:
+					event.append(part)
+					break	
+		event_list.append(event)
+	uber_shared_list = []
+	for idx,member in enumerate(event_list):
+		print idx
+		#setting cut_off so program knows to ignore extra long data sets
+		cut_off = timedelta(seconds = dih_event_range(member))
+		print cut_off
+		shared_list = []
+		for guy in member:
+			cut_off_time = datetime.strptime(guy[0],'%Y-%m-%dT%H:%M:%S.%f')+cut_off
+			peak_target = dih_ev_peak_compare(guy[3]+guy[4],guy[10][0])
+			channel = guy[1]
+			ivo = guy[5]
+			if peak_target < cut_off_time:
+				shared_list.append((datetime.strftime(peak_target,'%Y/%m/%d %H:%M:%S.%f'),channel,ivo))
+		channel_list = [131,171,211,304,335,193]
+		shared_no_copy_list = []
+		for idx,channel in enumerate(channel_list):
+			channel_group = [j for j, j in enumerate(shared_list) if j[1] == channel]
+			if len(channel_group)>0:
+				shared_no_copy_list.append(channel_group[0])
+			else:
+				continue
+		uber_shared_list.append(shared_no_copy_list)
+	return uber_shared_list
+			
+			
+		
 	
 	
 	
@@ -316,9 +376,7 @@ def dih_event_select(filename1):
 	
 	
 		
-    		
-    		
-
+    	
             
             
         
