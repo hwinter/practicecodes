@@ -348,6 +348,7 @@ def dih_event_crop_select(filename1):
 		shared_list = []
 		for guy in member:
 			cut_off_time = datetime.strptime(guy[0],'%Y-%m-%dT%H:%M:%S.%f')+cut_off
+			#find peak that corresponds to peak from original event file
 			peak_target = dih_ev_peak_compare(guy[3]+guy[4],guy[10][0])
 			channel = guy[1]
 			ivo = guy[5]
@@ -363,8 +364,18 @@ def dih_event_crop_select(filename1):
 				continue
 		uber_shared_list.append(shared_no_copy_list)
 	return uber_shared_list
-			
-			
+#
+#Name: dih_event_goes_select
+#
+#
+#
+#
+def dih_event_goes_select(filename,savename):
+	meta_file = open(filename,'r')
+	meta_lines = meta_file.readlines()
+	for member in meta_lines:
+		member = ast.literal_eval(member)
+		
 		
 	
 	
