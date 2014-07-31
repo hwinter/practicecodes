@@ -33,6 +33,7 @@ import shutil
 import ast
 from dih_max_comparison import dih_event_select
 from dih_event_range import dih_event_range
+from dih_max_comparison import dih_event_goes_select
 #
 #
 #
@@ -219,6 +220,53 @@ def dih_hist_crop_events(filename1,savename,channel1,channel2):
 	P.savefig(savename)
 		
 	return final 		
-							
+#
+#
+#
+#
+#Name: dih_hist_goes_131
+#
+#Purpose: takes data from dih_event_goes_select and plots a histogram of separations
+#
+#Inputs: same as dih_event_goes_select
+#
+#Outputs: end_hist_data_no_copy -> (131 peak, goes peak, separation), final -> (contents of bin, bins)
+#
+#Example: gah = dih_hist_goes_131('/metadata/info.txt','supersaved')
+#
+#Written: 7/31/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+def dih_hist_goes_131(filename,savename):
+	all_data = dih_event_goes_select(filename,savename)
+	hist_data = []
+	end_hist_data = []
+	for member in all_data:
+		hist_data.append(member[2])
+		end_hist_data.append((member[0][3][0],member[1][3],member[2]))
+	P.figure()
+	n, bins, patches = P.hist(hist_data,10,histtype = 'stepfilled')
+	final = []
+	final.append('GOES and 131 Histogram data: n,bins')
+	final.append(tuple(n))
+	final.append(tuple(bins))
+	P.setp(patches, 'facecolor','b','alpha',0.75)
+	P.xlabel('Time Difference between GOES and 131 peak in seconds')
+	P.ylabel('Number of Peaks')
+	P.title('Histogram of GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
+	P.savefig('/home/dherman/Documents/sun_plots/' + savename + '131_goes_hist.ps')
+	hist_data_file1 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_data.txt','w')
+	hist_data_file2 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_metadata.txt','w')
+	end_columns = zip(*end_hist_data)
+	goes_time_set = list(set(end_columns[1]))
+	end_hist_data_no_copy = []
+	for member in goes_time_set:
+		test_list = []
+		for pair in end_hist_data:
+			if pair[1] == member:
+				test_list.append(pair)
+		end_hist_data_no_copy.append(test_list[0]) 
+	hist_data_file1.write(str(end_hist_data_no_copy))
+	hist_data_file2.write(str(final))
+	return [end_hist_data_no_copy,final]							
 				
 			
