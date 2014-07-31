@@ -367,14 +367,106 @@ def dih_event_crop_select(filename1):
 #
 #Name: dih_event_goes_select
 #
+#Purpose:takes file containing pairs of metadata for goes/131 at the same time and picks out the primary 131 peak and the nearest x-ray peak. Will also plot goes and 131 at the same time for each event.
 #
+#Input: filename -> txt file created by dih_sun_recurs_goes_plot, savename -> string to put in savenames
 #
+#Output: text file containing metadata about shared 131/goes peaks (with new correlated peaks), ps files containing shared plots
+#
+#Example: gah = dih_event_goes_select('/metadata/131_goes_info.txt','savesunstring')
+#
+#Written: 7/31/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 def dih_event_goes_select(filename,savename):
 	meta_file = open(filename,'r')
 	meta_lines = meta_file.readlines()
+	#get data for 131 and goes
+	total_end_result = []
 	for member in meta_lines:
 		member = ast.literal_eval(member)
+		metadata_131 = member[0]
+		if metadata_131[-5] == 'flag':
+			print 'flag spotted'
+			continue
+		metadata_goes = member[1]
+		primary_peak = metadata_131[4]
+		compare_peaks = metadata_goes[3]+metadata_goes[4]
+		if len(primary_peak) > 0:
+			primary_dt = datetime.strptime(primary_peak[0],'%Y/%m/%d %H:%M:%S.%f')
+		else:
+			print "no primary peak in 131"
+			continue	
+		diff_list = []
+		abs_diff_list = []
+		target_goes_peak = []
+		for peak in compare_peaks:
+			peak_dt = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			diff = peak_dt-primary_dt
+			diff_num = diff.total_seconds()
+			abs_diff_num = abs(diff_num)
+			diff_list.append(diff_num)
+			abs_diff_list.append(abs_diff_num)
+		min_list = [i for i, j in enumerate(abs_diff_list) if j == min(abs_diff_list)]
+		goes_index = min_list[0]
+		target_goes_peak.append(compare_peaks[goes_index])
+		end_result = [metadata_131[0:3]+metadata_131[4:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list[goes_index]]
+		total_end_result.append(end_result)
+		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
+		simplejson.dump(end_result,end_file)
+		end_file.close()
+		#shared plotting regime
+		goes_x = list(member[2])
+		goes_y = list(member[3])
+		aia_x = metadata_131[-3]
+		aia_y = metadata_131[-2]
+		maxa = max(aia_y)
+		maxb = max(goes_y)
+		aia_y = (np.array(aia_y)-min(aia_y))/max(aia_y)
+		goes_y = (np.array(goes_y)-min(goes_y))/max(goes_y)
+		goes_start_time = datetime.strptime(metadata_goes[0],'%Y-%m-%dT%H:%M:%S.%f')
+		aia_start_time = datetime.strptime(metadata_131[0],'%Y-%m-%dT%H:%M:%S.%f')
+		start_diff = goes_start_time - aia_start_time
+		start_num = start_diff.total_seconds()
+		goes_x_adj = list(np.array(goes_x) - start_num)
+		plt.figure()
+		plt.plot(goes_x,goes_y,'b',linewidth = 1.0)
+		plt.plot(aia_x,aia_y,'r',linewidth = 1.0)
+		for peak in metadata_131[3]:
+			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			x_range = (peak_time-aia_start_time).total_seconds()
+			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
+			plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 8)
+		for peak in metadata_131[4]:
+			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			x_range = (peak_time-aia_start_time).total_seconds()
+			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
+			plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
+		for peak in metadata_goes[3]:
+			print metadata_goes[3]
+			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			x_range = (peak_time-goes_start_time).total_seconds()
+			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
+			print x_range_list
+			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'yD', markersize = 8)
+		for peak in metadata_goes[4]:
+			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			x_range = (peak_time-goes_start_time).total_seconds()
+			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
+			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 8)
+		for peak in target_goes_peak:
+			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			x_range = (peak_time-goes_start_time).total_seconds()
+			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
+			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+		plt.ylabel('Normalized Flux Units')
+		plt.xlabel('Seconds since ' + metadata_131[0])
+		plt.title('Lightcurve comparing 131 $\AA$ to GOES 1-8 $\AA$ at ' + metadata_131[0], y = 1.07)
+		plt.savefig('/data/george/dherman/sun_plots/' + savename + '_' + metadata_131[0] + '_' + str(metadata_131[-3][-1] + '_131_goes_shared_plot.ps')
+	return total_end_result	
+			
+			
+			
+		
 		
 		
 	
