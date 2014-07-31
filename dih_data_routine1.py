@@ -43,6 +43,28 @@ def dih_data_routine1(dirname,savename):
 			all_hist_info.append(hist_info)
 	return all_hist_info
 #
+#Name: dih_data_routine1_cropped
+#
+#
+#
+#
+def dih_data_routine1_cropped(dirname,savename):
+	#creates lightcurves, metadata, rawdata for ivo files
+	ivo_list = dih_sun_cropped_plotter(dirname,savename)
+	#creates shared_plots
+	total_shared_meta = dih_sun_recurs_shared_plot('/data/george/dherman/metadata/'+ savename+'_all_human_meta.txt',savename,'shared_plot')
+	channel_list = [131,171,211,304,335,193]
+	all_hist_info = []
+	#creates histograms for all channel combinations
+	for channel in channel_list:
+		other_channel_list = [j for j, j in enumerate(channel_list) if j != channel]
+		for member in other_channel_list:
+			hist_info = dih_hist_events('/data/george/dherman/metadata/'+ savename+'_all_human_meta.txt',str(channel)+'_'+str(member)+'_hist_'+savename,channel,member)
+			hist_file = open('/data/george/dherman/metadata/'+savename+'all_peak_comparison_human_meta.txt','a')
+			simplejson.dump(hist_info,hist_file)
+			hist_file.close()
+			all_hist_info.append(hist_info)
+	return all_hist_info
 #
 #
 #Name:dih_data_routine2()
