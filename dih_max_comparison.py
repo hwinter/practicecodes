@@ -461,7 +461,7 @@ def dih_event_goes_select(filename,savename):
 		plt.ylabel('Normalized Flux Units')
 		plt.xlabel('Seconds since ' + metadata_131[0])
 		plt.title('Lightcurve comparing 131 $\AA$ to GOES 1-8 $\AA$ at ' + metadata_131[0], y = 1.07)
-		plt.savefig('/data/george/dherman/sun_plots/' + savename + '_' + metadata_131[0] + '_' + str(metadata_131[-3][-1] + '_131_goes_shared_plot.ps')
+		plt.savefig('/data/george/dherman/sun_plots/' + savename + '_' + metadata_131[0] + '_' + str(metadata_131[-3][-1]) + '_131_goes_shared_plot.ps')
 	return total_end_result	
 			
 			
