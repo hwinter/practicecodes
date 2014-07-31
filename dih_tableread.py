@@ -24,6 +24,11 @@ def dih_filegrab(filename):
     grabbedcol = np.genfromtxt(filename, skip_header=1,skip_footer=1)
     columns = [list(row) for row in grabbedcol]
     return columns
+#helper fct same as filegrab but with no skipping header
+def dih_filegrab2(filename):
+    grabbedcol = np.genfromtxt(filename,skip_header=1)
+    columns = [list(row) for row in grabbedcol]
+    return columns
 
 #helper fct removes files from directory and grabs columns of data
 def dih_tablereader(dirname):
