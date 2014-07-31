@@ -4,6 +4,7 @@ import ast
 from itertools import islice
 from datetime import datetime
 from datetime import timedelta
+from dih_fft_fcm import dih_get_event_peak_time
 #Name: dih_goes_csv_reader
 #
 #Purpose: reads csv containing data on all flares and produces a list of events
@@ -88,3 +89,32 @@ def dih_goes_csv_checker(filename,csvfilename):
 			simplejson.dump([member,subeventlist],savefile)
 			savefile.close()
 	return GOES_events
+#
+#
+#
+#
+#
+#Name: dih_goes_csv_checker_event_files
+#
+#Purpose: search for goes events before and after peak time included in event file from Flare Detective
+#
+#Inputs: ev -> event file opened using readsav, csvfilename -> current Hinode flare catalogue csv
+#
+#Outputs: list of GOES events matching temporal criteria
+#
+#Example: goes_events = dih_goes_csv_checker_event_files(scipy.io.idl.readsav('eventfile.sav'),'hinode_flares.csv')
+#
+#Written: 7/29/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+def dih_goes_csv_checker_event_files(ev,csvfilename):
+	times = dih_get_event_peak_time(ev)
+	peak_time = datetime.strptime(times[0],'%Y-%m-%dT%H:%M:%S')
+	time1 = peak_time - timedelta(seconds = 1000)
+	time2 = peak_time + timedelta(seconds = 1000)
+	goes_peak_list = dih_goes_csv_compare(time1,time2,csvfilename)
+	if len(goes_peak_list) > 0:
+		return goes_peak_list
+	else:
+		return 'No Goes!'	
