@@ -159,12 +159,14 @@ def dih_uberplotter(dirname,savename):
 #Note: Form of metadata -> [Event Starting Time, Event Channel, Event Center, Relative Peaks, Primary Peak, Source Ivo File, Flagged Peaks, Corrupt: 'flag' (y) or 'clear' (n), Contains Flagged Peaks: 'peakflag' (y) or 'no_peakflag' (n)]
 
 
-def dih_sun_plotter(dirname,savename):
+def dih_sun_plotter(dirname,savename,cuepath):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
     ivo_list = directory_lists[1]
     ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
+    cue_file = open(cuepath,'r')
+    cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	print "processing "+str(idx)
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
@@ -172,6 +174,10 @@ def dih_sun_plotter(dirname,savename):
     	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
     	if len(completion) > 0:
     		print "ivo already processed"
+    		continue
+    	cue = [s for s in cue_lines if ivo_string in s]
+    	if len(cue) == 0:
+    		print "ivo not on cue list"
     		continue
     	innerdatalist = []
     	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
@@ -386,7 +392,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		if member < window or member > (len(ysmooth)-window):
 			continue
 		else:
-			plt.plot(x[member],ysmooth[member],'yD',markersize = 12)
+			plt.plot(x[member],ysmooth[member],'yD',markersize =8)
 			#recreating peak times from time difference data
 			first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
 			timediff = timedelta(seconds = x[member])
@@ -409,9 +415,9 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	flagged_peaklist = [j for j, j in enumerate(maxpeaklist) if x[j] < 250 or x[j] > x[-1]-250]
 	print flagged_peaklist
 	for member in real_peaklist:
-		plt.plot(x[member],ysmooth[member],'gD',markersize = 12)
+		plt.plot(x[member],ysmooth[member],'gD',markersize = 8)
 	for member in flagged_peaklist:
-		plt.plot(x[member],ysmooth[member],'rD',markersize = 12)
+		plt.plot(x[member],ysmooth[member],'rD',markersize = 8)
 	#creating chi-squared value
 	observed = np.array(ycopy)
 	expected = np.array(ysmooth)*np.sum(observed)
@@ -441,6 +447,8 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	fits_range = timedelta(seconds = x[-1])
 	fits_end = fits_time+fits_range
 	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+	metadatalist.append(x)
+	metadatalist.append(list(ysmooth))
 	metadatalist.append(fits_end)	
 	#pickling of metadata
 	#with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
@@ -490,12 +498,12 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 	if test == 0:
 		file2 = open('/data/george/dherman/metadata/'+savename+'_'+newname+'_human_meta_corrupted.txt','a')
 		file3 = open('/data/george/dherman/metadata/'+savename+'_'+newname+'_all_human_meta.txt','a')
-		file4 = open('/data/george/dherman/metadata/'+savename+'_'+newname+'_human_meta_304.txt','a')
+		file4 = open('/data/george/dherman/metadata/'+savename+'_'+newname+'_human_meta_131.txt','a')
 		file5 = open('/data/george/dherman/metadata/'+savename+'_'+newname+'_human_meta_peakflag.txt','a')
 	elif test == 1:
 		file2 = open('/data/george/dherman/metadata_test/'+savename+'_'+newname+'_human_meta_corrupted.txt','a')
 		file3 = open('/data/george/dherman/metadata_test/'+savename+'_'+newname+'_all_human_meta.txt','a')
-		file4 = open('/data/george/dherman/metadata_test/'+savename+'_'+newname+'_human_meta_304.txt','a')
+		file4 = open('/data/george/dherman/metadata_test/'+savename+'_'+newname+'_human_meta_131.txt','a')
 		file5 = open('/data/george/dherman/metadata_test/'+savename+'_'+newname+'_human_meta_peakflag.txt','a')
 	else:
 		print "Bad Test Keyword!" 
@@ -509,16 +517,20 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 			all_meta.append(metadatalist)
 			continue
 	for member in all_meta:
-		simplejson.dump(member,file3)
+		#simplejson.dump(member,file3)
+		file3.write(str(member))
 		file3.write('\n')
-		if member[1] == 304:
-			simplejson.dump(member,file4)
+		if member[1] == 131:
+			#simplejson.dump(member,file4)
+			file4.write(str(member))
 			file4.write('\n')
 		if member[7] == 'flag':
-			simplejson.dump(member,file2)
+			#simplejson.dump(member,file2)
+			file2.write(str(member))
 			file2.write('\n')
 		if member[8] == 'peakflag':
-			simplejson.dump(member,file5)
+			#simplejson.dump(member,file5)
+			file5.write(str(member))
 			file5.write('\n')	
 	file2.close()
 	file3.close()
@@ -650,12 +662,14 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 #Inputs: dirname = directory containing ivo files, savename = uber string to tie all saved files together
 #
 #Outputs:
-def dih_sun_cropped_plotter(dirname,savename):
+def dih_sun_cropped_plotter(dirname,savename,cuename):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
     ivo_list = directory_lists[1]
     ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
+    cue_file = open(cuename,'r')
+    cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	print "processing "+str(idx)
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
@@ -663,6 +677,10 @@ def dih_sun_cropped_plotter(dirname,savename):
     	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
     	if len(completion) > 0:
     		print "ivo already processed"
+    		continue
+    	cue = [s for s in cue_lines if ivo_string in s]
+    	if len(cue) == 0:
+    		print "ivo not on cue list"
     		continue
     	innerdatalist = []
     	ev = readsav(ivo_list[idx]+'/'+ivo_string+'.sav')
