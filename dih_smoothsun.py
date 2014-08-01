@@ -349,9 +349,8 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
 	fits_list = directory_lists[0]
 	ivo_list = directory_lists[1]
-	#datalist = pickle.load(open('/data/george/dherman/rawdata/'+ savename + str(num) + '.txt','rb'))
-	datalist = pickle.load(open(savename + str(num) + '.txt','rb'))
-	meta_datalist = pickle.load(open(savename+'_meta'+str(num)+'.txt','rb'))
+	datalist = pickle.load(open('/data/george/dherman/rawdata/' + savename + str(num) + '.txt','rb'))
+	meta_datalist = pickle.load(open('/data/george/dherman/metadata/' + savename + '_meta' + str(num) + '.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
 	print str(fits_channel)
@@ -431,7 +430,8 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	metadatalist.append(ivo_list[num])
 	metadatalist.append(flagged_peaktimelist)
 	smooth_range = max(ysmooth)-min(ysmooth)
-	if smooth_range > max(ysmooth)*.2:
+	#consider raising .75 to .9
+	if smooth_range > max(ysmooth)*1.0:
 		metadatalist.append('flag')
 	else:
 		metadatalist.append('clear')
@@ -510,7 +510,7 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 	list = range(len(ivo_list))
 	all_meta = []
 	for num in list:
-		if os.path.isfile(savename+str(num)+'.txt') == False or os.path.isfile(savename+'_meta'+str(num)+'.txt') == False:
+		if os.path.isfile('/data/george/dherman/rawdata/' + savename+str(num)+'.txt') == False or os.path.isfile('/data/george/dherman/metadata/' + savename+'_meta'+str(num)+'.txt') == False:
 			continue
 		else:
 			metadatalist = dih_sun_data_plot(dirname,savename,num,newname)
@@ -599,7 +599,7 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	elif fits_channel == 304:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)	
 		window = 7
-		color = 'o'
+		color = 'k'
 	elif fits_channel == 335:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
@@ -611,6 +611,11 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
 	relpeaktimelist = []
 	x = np.array(x) - diff_num
+	x_peaklist = argrelextrema(np.array(x),np.greater)
+	x_minlist = argrelextrema(np.array(x),np.less)
+	#removes lightcurves whose times are not monotonic
+	if len(x_peaklist[0])>0 or len(x_minlist[0]) >0:
+		return meta_datalist
 	for member in peaklist[0]:
 		if member < window or member > (len(ysmooth)-window):
 			continue
@@ -650,7 +655,7 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 		plt.title("Lightcurve at "+member[0]+" in all available channels",y=1.05)
 		#plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=2, ncol= len(member), mode="expand", borderaxespad=0.)
 		plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-		plt.savefig('/data/george/dherman/sun_plots/'+newname+'_shared_plot_'+member[0]+'.ps')
+		plt.savefig('/data/george/dherman/sun_plots/'+savename + '_' + newname+'_shared_plot_'+member[0]+'.ps')
 		total_meta.append(member_meta)
 	return total_meta
 #
@@ -671,7 +676,9 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     cue_file = open(cuename,'r')
     cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
-    	print "processing "+str(idx)
+    	if idx < 44:
+    		continue
+    	print "processing ivo "+str(idx)
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
     	ivo_string = ivo_list[idx][ivo_index:]
     	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
