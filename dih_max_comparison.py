@@ -412,25 +412,25 @@ def dih_event_goes_select(filename,savename):
 		end_result = [metadata_131[0:3]+metadata_131[4:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list[goes_index]]
 		total_end_result.append(end_result)
 		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
-		simplejson.dump(end_result,end_file)
-		end_file.close()
 		#shared plotting regime
 		goes_x = list(member[2])
 		goes_y = list(member[3])
+		goes_copy_y = list(member[3])
 		aia_x = metadata_131[-3]
 		aia_y = metadata_131[-2]
 		maxa = max(aia_y)
 		maxb = max(goes_y)
-		aia_y = (np.array(aia_y)-min(aia_y))/max(aia_y)
-		goes_y = (np.array(goes_y)-min(goes_y))/max(goes_y)
+		aia_y = (np.array(aia_y)-min(aia_y))/max(np.array(aia_y)-min(aia_y))
+		goes_y = (np.array(goes_y)-min(goes_y))/max(np.array(goes_y)-min(goes_y))
 		goes_start_time = datetime.strptime(metadata_goes[0],'%Y-%m-%dT%H:%M:%S.%f')
 		aia_start_time = datetime.strptime(metadata_131[0],'%Y-%m-%dT%H:%M:%S.%f')
 		start_diff = goes_start_time - aia_start_time
 		start_num = start_diff.total_seconds()
 		goes_x_adj = list(np.array(goes_x) - start_num)
-		plt.figure()
-		plt.plot(goes_x,goes_y,'b',linewidth = 1.0)
-		plt.plot(aia_x,aia_y,'r',linewidth = 1.0)
+		fig = plt.figure()
+		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
+		plt.plot(goes_x,goes_y,'b',linewidth = 1.0, label = 'GOES 1-8 $\AA$')
+		plt.plot(aia_x,aia_y,'r',linewidth = 1.0, label = 'AIA 131 $\AA$')
 		for peak in metadata_131[3]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
@@ -458,9 +458,13 @@ def dih_event_goes_select(filename,savename):
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+			end_result.append(goes_copy_y[x_range_list[0]])
+		simplejson.dump(end_result,end_file)
+		end_file.close()
 		plt.ylabel('Normalized Flux Units')
 		plt.xlabel('Seconds since ' + metadata_131[0])
-		plt.title('Lightcurve comparing 131 $\AA$ to GOES 1-8 $\AA$ at ' + metadata_131[0], y = 1.07)
+		plt.title('Lightcurve at ' + metadata_131[0], y = 1.07)
+		plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 		plt.savefig('/data/george/dherman/sun_plots/' + savename + '_' + metadata_131[0] + '_' + str(metadata_131[-3][-1]) + '_131_goes_shared_plot.ps')
 	return total_end_result	
 			
