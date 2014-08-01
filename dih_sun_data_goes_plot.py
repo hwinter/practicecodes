@@ -108,7 +108,7 @@ def dih_sun_data_goes_plot(datalist,start_time,savename):
 	metadatalist.append('data from sdac archive')
 	metadatalist.append(flagged_peaktimelist)
 	smooth_range = max(ysmooth)-min(ysmooth)
-	if smooth_range > max(ysmooth)*.2:
+	if smooth_range > max(ysmooth)*.9:
 		metadatalist.append('flag')
 	else:
 		metadatalist.append('clear')
@@ -160,8 +160,8 @@ def dih_sun_recurs_goes_plot(file_131,savename):
 		end_month = month_list[end_time.month - 1]
 		start_string = datetime.strftime(start_time,'%d-'+start_month+'-%Y %H:%M:%S.%f')
 		end_string = datetime.strftime(end_time,'%d-'+end_month+'-%Y %H:%M:%S.%f')
-		columns = dih_run_idl_goes_script(start_string,end_string,savename + '_goes_curve_' + start_string + '.txt')
-		with open(savename + '_goes_curve_' + start_string + '.txt','r') as f:
+		columns = dih_run_idl_goes_script(start_string,end_string,'/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt')
+		with open('/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt','r') as f:
 			first_line = [f.readline()]
 			real_first_time = dih_create_goes_times(first_line)[0]
 		list_goes = dih_sun_data_goes_plot(columns,real_first_time,savename)
