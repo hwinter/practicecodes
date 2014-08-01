@@ -3,12 +3,13 @@
 ;
 ;Purpose: gets goes data and saves it into a text file
 ;
+;Inputs: start and end time strings in format 'day-month(abbreviation)-year hours:minutes:seconds.microseconds', save_name -> name for txt file for goes data
 ;
+;Outputs: text file with two columns of time,flux data for goes along with a header containing the first time
 ;
+;Example: dih_get_goes, '01-May-2012 00:00:00.00','02-May-2012 00:00:00.00','goes_curve.txt'
 ;
-;
-;
-;
+;Written: 7/30/14 Dan Herman daniel.herman@cfa.harvard.edu
 ;
 ;
 pro dih_get_goes, start_time, end_time, save_name
