@@ -236,15 +236,36 @@ def dih_hist_crop_events(filename1,savename,channel1,channel2):
 #
 #Written: 7/31/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
-def dih_hist_goes_131(filename,savename):
-	all_data = dih_event_goes_select(filename,savename)
+def dih_hist_goes_131(filelist,savename):
+	all_data = dih_event_goes_select('/data/george/dherman/metadata/' + filelist[0] + '_all_human_meta_131_goes.txt',savename)
+	for idx,member in enumerate(filelist):
+		if idx < 1:
+			continue
+		all_data = all_data + dih_event_goes_select('/data/george/dherman/metadata/' + filelist[idx] + '_all_human_meta_131_goes.txt',savename)
 	hist_data = []
 	end_hist_data = []
 	for member in all_data:
 		hist_data.append(member[2])
-		end_hist_data.append((member[0][3][0],member[1][3],member[2]))
+		end_hist_data.append((member[0][3][0],member[1][3],member[2],member[3]))
+	end_columns = zip(*end_hist_data)
+	goes_time_set = list(set(end_columns[1]))
+	goes_class_set = []
+	end_hist_data_no_copy = []
+	hist_data_no_copy = []
+	for member in goes_time_set:
+		test_list = []
+		test_list2 =[]
+		for idx,pair in enumerate(end_hist_data):
+			if pair[1] == member:
+				test_list.append(pair)
+				test_list2.append(hist_data[idx])
+			else:
+				continue
+			end_hist_data_no_copy.append(test_list[0])
+			hist_data_no_copy.append(test_list2[0])
+			goes_class_set.append(pair)
 	P.figure()
-	n, bins, patches = P.hist(hist_data,10,histtype = 'stepfilled')
+	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(-250,251,25) ,histtype = 'stepfilled')
 	final = []
 	final.append('GOES and 131 Histogram data: n,bins')
 	final.append(tuple(n))
@@ -253,20 +274,59 @@ def dih_hist_goes_131(filename,savename):
 	P.xlabel('Time Difference between GOES and 131 peak in seconds')
 	P.ylabel('Number of Peaks')
 	P.title('Histogram of GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
-	P.savefig('/home/dherman/Documents/sun_plots/' + savename + '131_goes_hist.ps')
+	P.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_hist.ps')
 	hist_data_file1 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_data.txt','w')
 	hist_data_file2 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_metadata.txt','w')
-	end_columns = zip(*end_hist_data)
-	goes_time_set = list(set(end_columns[1]))
-	end_hist_data_no_copy = []
-	for member in goes_time_set:
-		test_list = []
-		for pair in end_hist_data:
-			if pair[1] == member:
-				test_list.append(pair)
-		end_hist_data_no_copy.append(test_list[0]) 
 	hist_data_file1.write(str(end_hist_data_no_copy))
 	hist_data_file2.write(str(final))
-	return [end_hist_data_no_copy,final]							
+	hist_data_file1.close()
+	hist_data_file2.close()
+	print goes_class_set
+	goes_A = [j for j in goes_class_set if j[-1] < 10**(-7)]
+	goes_B = [j for j in goes_class_set if j[-1] < 10**(-6) and j[-1] > 10**(-7)]
+	goes_C = [j for j in goes_class_set if j[-1] < 10**(-5) and j[-1] > 10**(-6)]
+	goes_M = [j for j in goes_class_set if j[-1] < 10**(-4) and j[-1] > 10**(-5)]
+	goes_X = [j for j in goes_class_set if j[-1] < 10**(-3) and j[-1] > 10**(-4)]
+	goes_all = [goes_A,goes_B,goes_C,goes_M,goes_X]
+	print goes_all
+	xTickMarks = ['A','B','C','M','X']
+	for idx,member in enumerate(goes_all):
+		if len(member) > 0:
+			goes_columns = zip(*member)
+			P.figure()
+			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(-250,251,25) ,histtype = 'stepfilled')
+			final = []
+			final.append('GOES and 131 Histogram data: n,bins')
+			final.append(tuple(n))
+			final.append(tuple(bins))
+			P.setp(patches, 'facecolor','b','alpha',0.75)
+			P.xlabel('Time Difference between GOES and 131 peak in seconds')
+			P.ylabel('Number of Peaks')
+			P.title('Histogram of class ' + xTickMarks[idx] + ' GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
+			P.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist.ps')
+			hist_data_file_a = open('/data/george/dherman/metadata/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist_data.txt','w')
+			hist_data_file_b = open('/data/george/dherman/metadata/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist_metadata.txt','w')
+			hist_data_file_a.write(str(goes_columns))
+			hist_data_file_b.write(str(final))
+			hist_data_file_a.close()
+			hist_data_file_b.close()
+	goes_num = [len(goes_A),len(goes_B),len(goes_C),len(goes_M),len(goes_X)]
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ind = np.arange(len(goes_num))
+	width = .7
+	rects1 = ax.bar(ind, goes_num, width,color='black')
+	ax.set_xlim(-width,len(ind)+width)
+	ax.set_ylim(0,45)
+	ax.set_ylabel('Number of Events')
+	ax.set_title('Distribution of GOES Events by Class')
+	ax.set_xticks(ind+width)
+	xtickNames = ax.set_xticklabels(xTickMarks)
+	plt.setp(xtickNames, rotation=45, fontsize=10)
+	plt.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_class_hist.ps')
+	hist_data_file3 = open('/data/george/dherman/metadata/' + savename + '_131_goes_class_hist_data.txt','w')
+	final_two = [tuple(goes_num),tuple(xTickMarks)]
+	hist_data_file3.write(str(final_two))
+	return [end_hist_data_no_copy,final,final_two]							
 				
 			
