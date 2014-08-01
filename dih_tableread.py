@@ -25,6 +25,21 @@ def dih_filegrab(filename):
     columns = [list(row) for row in grabbedcol]
     return columns
 #helper fct same as filegrab but with no skipping header
+#
+#Name: dih_filegrab2
+#
+#Purpose:taking human readable data and turning it into lists
+#
+#Inputs: file containing columns of data
+#
+#Outputs: columns -> (list of coordinates) can be unzipped to give columns
+#
+#Example: columns = zip(*dih_filegrab2('data.txt'))
+#
+#Written:7/31/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
 def dih_filegrab2(filename):
     grabbedcol = np.genfromtxt(filename,skip_header=1)
     columns = [list(row) for row in grabbedcol]
