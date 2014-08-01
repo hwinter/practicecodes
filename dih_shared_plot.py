@@ -33,6 +33,7 @@ def dih_shared_groups(metadatafile):
 	#Compare times to see which ones are within 2 minutes of each other
 	for idx,member in enumerate(events):
 		print type(member)
+		#consider increasing shared time limit
 		subshared_events = [j for j, j in enumerate(events) if abs((datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%S.%f')-datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')).total_seconds()) < 120]
 		subshared_times = []
 		for member in subshared_events:
