@@ -34,7 +34,7 @@ def dih_shared_groups(metadatafile):
 	for idx,member in enumerate(events):
 		print type(member)
 		#consider increasing shared time limit
-		subshared_events = [j for j, j in enumerate(events) if abs((datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%S.%f')-datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')).total_seconds()) < 120]
+		subshared_events = [j for j, j in enumerate(events) if abs((datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%S.%f')-datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')).total_seconds()) < 300]
 		subshared_times = []
 		for member in subshared_events:
 			subshared_times.append(member[0])
