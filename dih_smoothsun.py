@@ -641,6 +641,7 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 #
 def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 	shared_times = dih_shared_groups(metadatafile)
+	print shared_times
 	total_meta = []
 	for idx,member in enumerate(shared_times):
 		print "processing"+str(idx)
