@@ -159,26 +159,31 @@ def dih_uberplotter(dirname,savename):
 #Note: Form of metadata -> [Event Starting Time, Event Channel, Event Center, Relative Peaks, Primary Peak, Source Ivo File, Flagged Peaks, Corrupt: 'flag' (y) or 'clear' (n), Contains Flagged Peaks: 'peakflag' (y) or 'no_peakflag' (n)]
 
 
-def dih_sun_plotter(dirname,savename,cuepath):
+def dih_sun_plotter(dirname,savename):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
     ivo_list = directory_lists[1]
     ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
-    cue_file = open(cuepath,'r')
-    cue_lines = cue_file.readlines()
+    #cue_file = open(cuepath,'r')
+    #cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	print "processing "+str(idx)
+    	if idx < 44:
+    		continue
+    	member_fits = glob.glob(dirpath + '/*.fits')
+    	if len(member_fits) < 100:
+    		continue
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
     	ivo_string = ivo_list[idx][ivo_index:]
     	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
     	if len(completion) > 0:
     		print "ivo already processed"
     		continue
-    	cue = [s for s in cue_lines if ivo_string in s]
-    	if len(cue) == 0:
-    		print "ivo not on cue list"
-    		continue
+    	#cue = [s for s in cue_lines if ivo_string in s]
+    	#if len(cue) == 0:
+    		#print "ivo not on cue list"
+    		#continue
     	innerdatalist = []
     	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
     	if inlist == 11 or len(inlist[0]) < 50:#handling corrupt data cases
@@ -269,7 +274,7 @@ def dih_sun_plotter(dirname,savename,cuepath):
     	metadatalist.append(ivo_list[idx])
     	metadatalist.append(flagged_peaktimelist)
     	smooth_range = max(ysmooth)-min(ysmooth)
-    	if smooth_range > max(ysmooth)*.2:
+    	if smooth_range > max(ysmooth)* 1.0:
     		metadatalist.append('flag')
     		file_corr = open('/data/george/dherman/metadata/' + 'all_corrupted_ivolist.txt','a')
     		simplejson.dump(ivo_list[idx],file_corr)
@@ -286,9 +291,10 @@ def dih_sun_plotter(dirname,savename,cuepath):
     	else:
     		metadatalist.append('no_peakflag')
     	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
-    	fits_range = datetime.timedelta(seconds = x[-1])
+    	fits_range = timedelta(seconds = x[-1])
     	fits_end = fits_time+fits_range
     	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+    	metadatalist.append(fits_end)
     	#pickling of metadata
     	with open('/data/george/dherman/metadata/' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
     		pickle.dump(metadatalist,fff)
@@ -305,7 +311,7 @@ def dih_sun_plotter(dirname,savename,cuepath):
     	plt.xlabel('Seconds Since' + ' ' + fits_date)
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig('/data/george/dherman/sun_plots/' + fits_date + '_' + savename + str(idx) + '.ps')#saves postscript file
-    	file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
+    	file_ivo = open('/data/george/dherman/map_completed/all_completed_no_sav_ivolist.txt','a')
     	simplejson.dump(ivo_list[idx],file_ivo)
     	file_ivo.write('\n')
     	file_ivo.close()		
@@ -319,18 +325,75 @@ def dih_sun_plotter(dirname,savename,cuepath):
 #
 #
 def dih_sun_mapper(dirname,savename):
-	fitslist = finder.dih_dir_finder(dirname)
-	totalrawdata = []
-	for idx,dirpath in enumerate(fitslist):
-		print "processing "+str(idx)
-		inlist = zip(*dih_lightcurvedata(dirpath))
-		plotlist = [list(row) for row in inlist]
-		rawdata = plotlist
-		np.savetxt(savename+'rawcol'+str(idx)+'.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from '+date.dih_sunfirst(dirpath)+' for channel '+str(channel.dih_sunchannel(dirpath))+' created on '+time.strftime("%c"))
-		totalrawdata.append(rawdata)
-		np.savetxt(savename+'metacol'+str(idx)+'.txt',np.column_stack((date.dih_sunfirst(dirpath),channel.dih_sunchannel(dirpath),chi)),header = 'metadata for lightcurve generated on'+time.strftime("%c"))
-	return totalrawdata
-#
+    directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+    fits_list = directory_lists[0]
+    ivo_list = directory_lists[1]
+    ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
+    lines_ivo = ivos_file.readlines()
+    #cue_file = open(cuepath,'r')
+    #cue_lines = cue_file.readlines()
+    for idx,dirpath in enumerate(fits_list):
+    	print "processing "+str(idx)
+    	if idx < 44:
+    		continue
+    	member_fits = glob.glob(dirpath + '/*.fits')
+    	if len(member_fits) < 100:
+    		continue
+    	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
+    	ivo_string = ivo_list[idx][ivo_index:]
+    	completion = [s for s in lines_ivo if ivo_string in s]#tests to see if we have worked on this ivo file before
+    	if len(completion) > 0:
+    		print "ivo already processed"
+    		continue
+    	#cue = [s for s in cue_lines if ivo_string in s]
+    	#if len(cue) == 0:
+    		#print "ivo not on cue list"
+    		#continue
+    	innerdatalist = []
+    	inlist = datum.dih_sunplot_data(dirpath)#gets data and metadata
+    	if inlist == 11 or len(inlist[0]) < 50:#handling corrupt data cases
+    		file_corr = open('/data/george/dherman/metadata/all_corrupted_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_corr)
+    		file_corr.write('\n')
+    		file_corr.close()
+    		file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
+    		simplejson.dump(ivo_list[idx],file_ivo)
+    		file_ivo.write('\n')
+    		file_ivo.close()
+    		continue
+    	fits_date = inlist[2]#datetime for first fits file in dirpath
+    	fits_channel = inlist[3]#channel for first fits
+    	print str(fits_channel)
+    	fits_center = inlist[4]#center of first fits
+    	metadatalist = []
+    	metadatalist.append(fits_date)
+    	metadatalist.append(fits_channel)
+    	metadatalist.append(fits_center)
+    	x = inlist[1] #x coordinate data
+    	innerdatalist.append(x)
+    	y = inlist[0] #y coordinate data
+    	innerdatalist.append(y)
+    	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+    	fits_range = timedelta(seconds = x[-1])
+    	fits_end = fits_time+fits_range
+    	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+    	metadatalist.append(fits_end)
+    	#pickling of metadata
+    	with open('/data/george/dherman/metadata/' + savename + '_meta' + str(idx) + '.txt','wb') as fff:
+    		pickle.dump(metadatalist,fff)
+    
+    	#Saving all relavant metadata/peakdata to human readable text file
+    	file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta.txt','a')
+    	#save each lightcurve's raw data into separate txt file
+    	with open('/data/george/dherman/rawdata/'+savename+str(idx)+'.txt','wb') as fff:
+    		pickle.dump(innerdatalist,fff)
+    	#human readable save format
+    	np.savetxt('/data/george/dherman/rawdata/' + fits_date + '_' + savename + '_col' + str(idx) + '.txt',np.column_stack((x,y)),header = 'x=time,y=flux data from ' + fits_date + ' for channel ' + str(fits_channel) + ' created on ' + time.strftime("%c"),footer = str(ivo_list[idx]))
+    	file_ivo = open('/data/george/dherman/map_completed/all_completed_no_sav_ivolist.txt','a')
+    	simplejson.dump(ivo_list[idx],file_ivo)
+    	file_ivo.write('\n')
+    	file_ivo.close()
+    return ivo_list	
 #
 #Name: dih_sun_data_plot
 #
@@ -674,10 +737,14 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     ivo_list = directory_lists[1]
     ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
-    cue_file = open(cuename,'r')
-    cue_lines = cue_file.readlines()
+    if type(cuename) == str:
+    	cue_file = open(cuename,'r')
+    	cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	if idx < 44:
+    		continue
+    	member_fits = glob.glob(dirpath + '/*.fits')
+    	if len(member_fits) < 100:
     		continue
     	print "processing ivo "+str(idx)
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
@@ -686,11 +753,20 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	if len(completion) > 0:
     		print "ivo already processed"
     		continue
-    	cue = [s for s in cue_lines if ivo_string in s]
-    	if len(cue) == 0:
-    		print "ivo not on cue list"
-    		continue
+    	if type(cuename) == str:
+    		cue = [s for s in cue_lines if ivo_string in s]
+    		if len(cue) == 0:
+    			print "ivo not on cue list"
+    			continue
     	innerdatalist = []
+    	#checking for existence of sav file with metadata
+    	if os.path.isfile(ivo_list[idx]+'/'+ivo_string+'.sav') == False:
+    		print 'no sav file' + ivo_list[idx]
+    		no_sav_file = open('/data/george/dherman/metadata/' + savename + '_no_sav_file_ivos.txt','a')
+    		no_sav_file.write(ivo_list[idx])
+    		no_sav_file.write('\n')
+    		no_sav_file.close()
+    		continue
     	ev = readsav(ivo_list[idx]+'/'+ivo_string+'.sav')
     	bounding_box = fcm.dih_get_event_bounding_box(ev)
     	ev_peak_time = fcm.dih_get_event_peak_time(ev)
@@ -824,7 +900,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	plt.xlabel('Seconds Since' + ' ' + fits_date)
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig('/data/george/dherman/sun_plots/' + fits_date + '_' + savename + str(idx) + '.ps')#saves postscript file
-    	file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
+    	file_ivo = open('/data/george/dherman/map_completed/all_completed.txt','a')
     	simplejson.dump(ivo_list[idx],file_ivo)
     	file_ivo.write('\n')
     	file_ivo.close()		
