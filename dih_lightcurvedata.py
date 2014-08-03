@@ -21,6 +21,6 @@ import dih_dir_finder as finder
 #
 #
 def dih_lightcurvedata(name):
-	x = times.dih_sunplot_times(name)#retrieves times
+	#x = times.dih_sunplot_times(name)#retrieves times
 	y = values.dih_suncurve(name)#retrieves fluxes
 	return zip(x,y)
