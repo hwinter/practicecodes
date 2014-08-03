@@ -5,6 +5,7 @@ from sunpy.image.coalignment import mapcube_coalign_by_match_template
 from datetime import datetime
 import numpy as np
 from dih_fft_fcm import dih_get_cropped_map
+import pyfits
 #
 #Name:dih_sunplot_data
 #
@@ -23,11 +24,18 @@ def dih_sunplot_data(dirname):
 	curvelist = []
 	if len(filelist)>0:
 		for idx,member in enumerate(filelist):#make list of sunpy maps
-			print "mapping "+str(idx)
-			my_map = sunpy.map.Map(member)
-			maplist.append(my_map)
-			sigma = np.sum(my_map)#creates lightcurve data
-			curvelist.append(sigma)
+			print 'testing file ' + str(idx)
+			#testing for truncated fits files!
+			try:
+				file_open = pyfits.open(member)
+				file_data = file_open[0].data
+				print "mapping "+str(idx)
+				my_map = sunpy.map.Map(member)
+				maplist.append(my_map)
+				sigma = np.sum(my_map)#creates lightcurve data
+				curvelist.append(sigma)
+			except ValueError:
+				print 'Truncated fits file!'
 		difflist = []
 		for map in maplist:#populate difflist with time differences to first map
 			string1 = maplist[0].date
