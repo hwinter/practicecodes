@@ -7,6 +7,8 @@ from dih_smoothsun import dih_sun_plotter
 from dih_smoothsun import dih_sun_recurs_shared_plot
 from dih_smoothsun import dih_sun_recurs_data_plot
 from dih_hist_171_peaks import dih_hist_events
+from dih_hist_171_peaks import dih_hist_goes_131
+from dih_sun_data_goes_plot import dih_sun_recurs_goes_plot
 #
 #
 #
@@ -108,3 +110,20 @@ def dih_data_routine2(dirname,savename,newname,test):
 			hist_file.close()
 			all_hist_info.append(hist_info)
 	return all_hist_info
+#
+#
+#Name: dih_data_131_goes_routine
+#
+#
+#
+#
+def dih_data_131_goes_routine(dirname,savename,newname,savelist,histname):
+	meta_path = '/data/george/dherman/metadata/'
+	save_path = savename + '_' + newname
+	savelist.append(save_path)
+	all_meta = dih_sun_recurs_data_plot(dirname,savename,newname,0)
+	total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ save_path + '_all_human_meta.txt',savename,newname,0)
+	uber_goes_metadatalist = dih_sun_recurs_goes_plot(meta_path + save_path + '_human_meta_131.txt',savename + '_' + newname)
+	hist_final = dih_hist_goes_131(savelist,histname)
+	return hist_final
+	
