@@ -36,6 +36,8 @@ def dih_sunplot_data(dirname):
 				curvelist.append(sigma)
 			except ValueError:
 				print 'Truncated fits file!'
+			except IOError:
+				print 'Corrupt/Empty fits file!'
 		difflist = []
 		for map in maplist:#populate difflist with time differences to first map
 			string1 = maplist[0].date
