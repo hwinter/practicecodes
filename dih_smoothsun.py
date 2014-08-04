@@ -418,6 +418,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	fits_channel = meta_datalist[1]#channel for first fits
 	print str(fits_channel)
 	fits_center = meta_datalist[2]#center of first fits
+	fits_box = meta_datalist[-4]
 	colors = iter(cm.rainbow(np.linspace(0,1,len(datalist[0])))) #creates color table
 	x = datalist[0] #x coordinate data
 	y = datalist[1] #y coordinate data
@@ -441,6 +442,9 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)	
 		window = 7
 	elif fits_channel == 335:
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+		window = 7
+	elif fits_channel == 94:
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 	else:
@@ -510,6 +514,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	fits_range = timedelta(seconds = x[-1])
 	fits_end = fits_time+fits_range
 	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
+	metadatalist.append(fits_box)
 	metadatalist.append(x)
 	metadatalist.append(list(ysmooth))
 	metadatalist.append(fits_end)	
@@ -667,6 +672,10 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
 		window = 7
 		color = 'r'
+	elif fits_channel == 94:
+		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+		window = 7
+		color = 'c'
 	else:
 		print "Bad Channel!"	
 	peaklist = argrelextrema(ysmooth,np.greater)#relative max
