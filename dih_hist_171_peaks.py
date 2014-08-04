@@ -261,9 +261,9 @@ def dih_hist_goes_131(filelist,savename):
 				test_list2.append(hist_data[idx])
 			else:
 				continue
-			end_hist_data_no_copy.append(test_list[0])
-			hist_data_no_copy.append(test_list2[0])
-			goes_class_set.append(pair)
+		end_hist_data_no_copy.append(test_list[0])
+		hist_data_no_copy.append(test_list2[0])
+		goes_class_set.append(test_list[0])
 	P.figure()
 	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(-250,251,25) ,histtype = 'stepfilled')
 	final = []
