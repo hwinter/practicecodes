@@ -88,6 +88,8 @@ def dih_get_cropped_map(ev, file_list,savename):
     			temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_' + str(idx) + '_cropped.fits', filetype='fits')
     	except ValueError:
     		print 'Truncated fits file!'
+    	except IOError:
+			print 'Corrupt/Empty fits file!'
     print("out_map_list",len(out_map_list))
     return out_map_list
 ###########################################################################
