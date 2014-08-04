@@ -410,14 +410,17 @@ def dih_event_goes_select(filename,savename):
 		goes_index = min_list[0]
 		target_goes_peak.append(compare_peaks[goes_index])
 		end_result = [metadata_131[0:3]+metadata_131[4:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list[goes_index]]
-		total_end_result.append(end_result)
-		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
 		#shared plotting regime
 		goes_x = list(member[2])
 		goes_y = list(member[3])
 		goes_copy_y = list(member[3])
 		aia_x = metadata_131[-3]
 		aia_y = metadata_131[-2]
+		x_peaklist = argrelextrema(np.array(aia_x),np.greater)
+		x_minlist = argrelextrema(np.array(aia_x),np.less)
+		#removes lightcurves whose times are not monotonic
+		if len(x_peaklist[0])>0 or len(x_minlist[0]) >0:
+			continue
 		maxa = max(aia_y)
 		maxb = max(goes_y)
 		aia_y = (np.array(aia_y)-min(aia_y))/max(np.array(aia_y)-min(aia_y))
@@ -459,6 +462,8 @@ def dih_event_goes_select(filename,savename):
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
 			end_result.append(goes_copy_y[x_range_list[0]])
+		total_end_result.append(end_result)
+		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
 		simplejson.dump(end_result,end_file)
 		end_file.close()
 		plt.ylabel('Normalized Flux Units')
