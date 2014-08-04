@@ -741,7 +741,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	cue_file = open(cuename,'r')
     	cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
-    	if idx < 44:
+    	if idx < 776:
     		continue
     	member_fits = glob.glob(dirpath + '/*.fits')
     	if len(member_fits) < 100:
@@ -801,6 +801,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
     	#channel-selective smoothing
     	print "at smoothing "+str(idx)
+    	print str(fits_channel)
     	if fits_channel == 131:
     		ysmooth = box.dih_boxavg_recurs(yspikeless,11,2)
     		window = 11
@@ -816,6 +817,12 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	elif fits_channel == 304:
     		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
     		window = 7
+    	elif fits_channel == 335:
+    		ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+    		window = 7
+    	elif fits_channel == 94:
+			ysmooth = box.dih_boxavg_recurs(yspikeless,7,2)
+			window = 7
     	else:
     		print "Bad Channel!"
     		continue	
