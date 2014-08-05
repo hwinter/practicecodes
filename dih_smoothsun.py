@@ -753,7 +753,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	if idx < 776:
     		continue
     	member_fits = glob.glob(dirpath + '/*.fits')
-    	if len(member_fits) < 100:
+    	if len(member_fits) < 100 or len(member_fits) > 600:
     		continue
     	print "processing ivo "+str(idx)
     	ivo_index = ivo_list[idx].find('ivo')#find relavant section of string
