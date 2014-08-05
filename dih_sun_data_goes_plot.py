@@ -28,15 +28,11 @@ from scipy.stats import chisquare
 import simplejson
 import dih_boxavg as box
 import os.path
-import os
-import shutil
-from dih_shared_plot import dih_shared_groups
-import ast
-from scipy.io.idl import readsav
-import dih_fft_fcm as fcm
+import os       
 from dih_goes_csv_reader import dih_goes_csv_checker_event_files
 from dih_create_goes_times import dih_create_goes_times
 from dih_run_idl_script import dih_run_idl_goes_script
+import ast
 #
 #Name: dih_sun_data_goes_plot
 #
@@ -161,6 +157,8 @@ def dih_sun_recurs_goes_plot(file_131,savename):
 		start_string = datetime.strftime(start_time,'%d-'+start_month+'-%Y %H:%M:%S.%f')
 		end_string = datetime.strftime(end_time,'%d-'+end_month+'-%Y %H:%M:%S.%f')
 		columns = dih_run_idl_goes_script(start_string,end_string,'/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt')
+		if columns == 11:
+			continue
 		with open('/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt','r') as f:
 			first_line = [f.readline()]
 			real_first_time = dih_create_goes_times(first_line)[0]
