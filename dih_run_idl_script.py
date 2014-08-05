@@ -2,6 +2,7 @@ import pidly
 from dih_tableread import dih_filegrab2
 import ast
 import subprocess
+import os.path
 #
 #Name: dih_run_idl_goes_script
 #
@@ -24,7 +25,10 @@ def dih_run_idl_goes_script(start_time,end_time,save_name):
 	#txt_file = open(save_name,'r')
 	#txt_lines = txt_file.readlines()
 	#txt_header = ast.literal_eval(txt_lines[0])
-	columns = dih_filegrab2(save_name)
+	if os.path.isfile(save_name) == True:
+		columns = dih_filegrab2(save_name)
+	else:
+		return 11
 	idl.close()
 	subprocess.call(["killall", "idl"])
 	return zip(*columns)
