@@ -13,6 +13,13 @@
 ;
 ;
 pro dih_get_goes, start_time, end_time, save_name
+catch, Error_status
+IF Error_status NE 0 THEN BEGIN
+      PRINT, 'Error index: ', Error_status
+      PRINT, 'Error message: ', !ERROR_STATE.MSG
+      CATCH, /CANCEL
+      return
+   END
 rd_goes_sdac, stime= start_time ,etime=end_time, tarray=goes_time, yarray=goes_flux, base_ascii=base_ascii
 time_str =  atime(goes_time+anytim(base_ascii))
 new_time = goes_time - goes_time[0]
