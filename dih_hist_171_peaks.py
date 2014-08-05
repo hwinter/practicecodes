@@ -34,6 +34,7 @@ import ast
 from dih_max_comparison import dih_event_select
 from dih_event_range import dih_event_range
 from dih_max_comparison import dih_event_goes_select
+import math
 #
 #
 #
@@ -265,7 +266,9 @@ def dih_hist_goes_131(filelist,savename):
 		hist_data_no_copy.append(test_list2[0])
 		goes_class_set.append(test_list[0])
 	P.figure()
-	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(-250,251,25) ,histtype = 'stepfilled')
+	maxhistprimary = math.ceil(max(hist_data_no_copy)/25)*25
+	minhistprimary = math.floor(min(hist_data_no_copy)/25)*25
+	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(int(minhistprimary),int(maxhistprimary + 1),25) ,histtype = 'stepfilled')
 	final = []
 	final.append('GOES and 131 Histogram data: n,bins')
 	final.append(tuple(n))
@@ -294,7 +297,12 @@ def dih_hist_goes_131(filelist,savename):
 		if len(member) > 0:
 			goes_columns = zip(*member)
 			P.figure()
-			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(-250,251,25) ,histtype = 'stepfilled')
+			maxhist = math.ceil(max(goes_columns[-2])/25)*25
+			print 'hists'
+			print str(maxhist)
+			minhist = math.floor(min(goes_columns[-2])/25)*25
+			print str(minhist)
+			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(int(minhist),int(maxhist+1),25) ,histtype = 'stepfilled')
 			final = []
 			final.append('GOES and 131 Histogram data: n,bins')
 			final.append(tuple(n))
