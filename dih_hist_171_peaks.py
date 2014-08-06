@@ -247,7 +247,7 @@ def dih_hist_goes_131(filelist,savename):
 	end_hist_data = []
 	for member in all_data:
 		hist_data.append(member[2])
-		end_hist_data.append((member[0][3][0],member[1][3],member[2],member[3]))
+		end_hist_data.append((member[0][3],member[1][3],member[2],member[3]))
 	end_columns = zip(*end_hist_data)
 	goes_time_set = list(set(end_columns[1]))
 	goes_class_set = []
@@ -330,7 +330,7 @@ def dih_hist_goes_131(filelist,savename):
 	ax.set_title('Distribution of GOES Events by Class')
 	ax.set_xticks(ind+width)
 	xtickNames = ax.set_xticklabels(xTickMarks)
-	plt.setp(xtickNames, rotation=45, fontsize=10)
+	plt.setp(xtickNames, rotation=45, fontsize=20)
 	plt.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_class_hist.ps')
 	hist_data_file3 = open('/data/george/dherman/metadata/' + savename + '_131_goes_class_hist_data.txt','w')
 	final_two = [tuple(goes_num),tuple(xTickMarks)]
