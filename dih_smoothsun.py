@@ -916,7 +916,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	plt.xlabel('Seconds Since' + ' ' + fits_date)
     	plt.ylabel('Arbitrary Flux Units')
     	plt.savefig('/data/george/dherman/sun_plots/' + fits_date + '_' + savename + str(idx) + '.ps')#saves postscript file
-    	file_ivo = open('/data/george/dherman/map_completed/all_completed.txt','a')
+    	file_ivo = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','a')
     	simplejson.dump(ivo_list[idx],file_ivo)
     	file_ivo.write('\n')
     	file_ivo.close()		
