@@ -391,6 +391,7 @@ def dih_event_goes_select(filename,savename):
 		metadata_goes = member[1]
 		primary_peak = metadata_131[4]
 		compare_peaks = metadata_goes[3]+metadata_goes[4]
+		compare_131_peaks = metadata_131[3]+metadata_131[4]
 		if len(primary_peak) > 0:
 			primary_dt = datetime.strptime(primary_peak[0],'%Y/%m/%d %H:%M:%S.%f')
 		else:
@@ -409,13 +410,33 @@ def dih_event_goes_select(filename,savename):
 		min_list = [i for i, j in enumerate(abs_diff_list) if j == min(abs_diff_list)]
 		goes_index = min_list[0]
 		target_goes_peak.append(compare_peaks[goes_index])
-		end_result = [metadata_131[0:3]+metadata_131[4:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list[goes_index]]
+		diff_list_131 = []
+		abs_diff_list_131 = []
+		target_131_peak = []
+		primary_goes_dt = datetime.strptime(target_goes_peak[0],'%Y/%m/%d %H:%M:%S.%f')
+		for peak in compare_131_peaks:
+			peak_dt = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+			diff = peak_dt-primary_goes_dt
+			diff_num = diff.total_seconds()
+			abs_diff_num = abs(diff_num)
+			diff_list_131.append((-1)*diff_num)
+			abs_diff_list_131.append(abs_diff_num)
+		min_list_131 = [i for i, j in enumerate(abs_diff_list_131) if j == min(abs_diff_list_131)]
+		aia_index = min_list_131[0]
+		target_131_peak.append(compare_131_peaks[aia_index])
+		if compare_131_peaks[aia_index] == compare_peaks[goes_index]:
+			end_result = [metadata_131[0:3]+metadata_131[4:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list[goes_index]]
+			key = 137
+		else:
+			end_result = [metadata_131[0:3]+ target_131_peak + metadata_131[5:],metadata_goes[0:3]+target_goes_peak+metadata_goes[5:],diff_list_131[aia_index]]
+			key = 11		
 		#shared plotting regime
 		goes_x = list(member[2])
 		goes_y = list(member[3])
 		goes_copy_y = list(member[3])
 		aia_x = metadata_131[-3]
 		aia_y = metadata_131[-2]
+		aia_copy_y = aia_y
 		x_peaklist = argrelextrema(np.array(aia_x),np.greater)
 		x_minlist = argrelextrema(np.array(aia_x),np.less)
 		#removes lightcurves whose times are not monotonic
@@ -456,12 +477,25 @@ def dih_event_goes_select(filename,savename):
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 8)
-		for peak in target_goes_peak:
-			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
-			x_range = (peak_time-goes_start_time).total_seconds()
-			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
-			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
-			end_result.append(goes_copy_y[x_range_list[0]])
+		if key == 137:
+			for peak in target_goes_peak:
+				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+				x_range = (peak_time-goes_start_time).total_seconds()
+				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+				end_result.append(goes_copy_y[x_range_list[0]])
+		if key == 11:
+			for peak in target_goes_peak:
+				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+				x_range = (peak_time-goes_start_time).total_seconds()
+				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+				end_result.append(goes_copy_y[x_range_list[0]])
+			for peak in target_131_peak:
+				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
+				x_range = (peak_time-aia_start_time).total_seconds()
+				x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
+				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
 		total_end_result.append(end_result)
 		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
 		simplejson.dump(end_result,end_file)
