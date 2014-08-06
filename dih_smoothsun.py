@@ -876,7 +876,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	metadatalist.append(ivo_list[idx])
     	metadatalist.append(flagged_peaktimelist)
     	smooth_range = max(ysmooth)-min(ysmooth)
-    	if smooth_range > max(ysmooth)*.2:
+    	if smooth_range > max(ysmooth)*1.0:
     		metadatalist.append('flag')
     		file_corr = open('/data/george/dherman/metadata/' + 'all_corrupted_ivolist.txt','a')
     		simplejson.dump(ivo_list[idx],file_corr)
