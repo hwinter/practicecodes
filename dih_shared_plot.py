@@ -37,7 +37,7 @@ def dih_shared_groups(metadatafile):
 		subshared_events = [j for j, j in enumerate(events) if abs((datetime.strptime(j[0],'%Y-%m-%dT%H:%M:%S.%f')-datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')).total_seconds()) < 300]
 		subshared_times = []
 		for member in subshared_events:
-			subshared_times.append(member[0])
+			subshared_times.append(member[-2])
 		shared_times.append(tuple(set(tuple(subshared_times))))
 	shared_times = list(set(shared_times))
 	return shared_times
