@@ -55,7 +55,10 @@ def dih_sun_data_goes_plot(datalist,start_time,savename):
 	window = 35
 	ysmooth = box.dih_boxavg_recurs(y,window,2)
 	peaklist = argrelextrema(ysmooth,np.greater)#relative max
-	peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
+	try:
+		peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
+	except ValueError:
+		return 11
 	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
 	plt.figure()
 	relpeaktimelist = []
@@ -163,6 +166,8 @@ def dih_sun_recurs_goes_plot(file_131,savename):
 			first_line = [f.readline()]
 			real_first_time = dih_create_goes_times(first_line)[0]
 		list_goes = dih_sun_data_goes_plot(columns,real_first_time,savename)
+		if list_goes == 11:
+			continue
 		metadatalist = list_goes[0]
 		meta_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_131_goes.txt','a')
 		meta_file.write(str([member,metadatalist,list_goes[1],list(list_goes[2])]))
