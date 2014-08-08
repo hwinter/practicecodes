@@ -408,7 +408,10 @@ def dih_event_goes_select(filename,savename):
 			diff_list.append(diff_num)
 			abs_diff_list.append(abs_diff_num)
 		min_list = [i for i, j in enumerate(abs_diff_list) if j == min(abs_diff_list)]
-		goes_index = min_list[0]
+		if len(min_list) > 0:
+			goes_index = min_list[0]
+		else:
+			continue
 		target_goes_peak.append(compare_peaks[goes_index])
 		diff_list_131 = []
 		abs_diff_list_131 = []
@@ -434,8 +437,8 @@ def dih_event_goes_select(filename,savename):
 		goes_x = list(member[2])
 		goes_y = list(member[3])
 		goes_copy_y = list(member[3])
-		aia_x = metadata_131[-3]
-		aia_y = metadata_131[-2]
+		aia_x = metadata_131[-4]
+		aia_y = metadata_131[-3]
 		aia_copy_y = aia_y
 		x_peaklist = argrelextrema(np.array(aia_x),np.greater)
 		x_minlist = argrelextrema(np.array(aia_x),np.less)
@@ -458,44 +461,55 @@ def dih_event_goes_select(filename,savename):
 		for peak in metadata_131[3]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
+			print peak_time
+			print aia_start_time
+			print x_range
 			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
-			plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 8)
+			if len(x_range_list) > 0:
+				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 8)
 		for peak in metadata_131[4]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
-			plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
+			if len(x_range_list) > 0:
+				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
 		for peak in metadata_goes[3]:
 			print metadata_goes[3]
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
-			print x_range_list
-			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'yD', markersize = 8)
+			if len(x_range_list) > 0:
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'yD', markersize = 8)
 		for peak in metadata_goes[4]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
-			plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 8)
+			if len(x_range_list) > 0:
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 8)
 		if key == 137:
 			for peak in target_goes_peak:
 				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 				x_range = (peak_time-goes_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
-				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+				if len(x_range_list) > 0:
+					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
 				end_result.append(goes_copy_y[x_range_list[0]])
 		if key == 11:
 			for peak in target_goes_peak:
 				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 				x_range = (peak_time-goes_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
-				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
-				end_result.append(goes_copy_y[x_range_list[0]])
+				if len(x_range_list) > 0:
+					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+					end_result.append(goes_copy_y[x_range_list[0]])
+				else:
+					end_result.append('cannot find goes')	
 			for peak in target_131_peak:
 				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 				x_range = (peak_time-aia_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
-				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
+				if len(x_range_list) > 0:
+					plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
 		total_end_result.append(end_result)
 		end_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_goes131_compared.txt','a')
 		simplejson.dump(end_result,end_file)
