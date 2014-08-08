@@ -114,16 +114,28 @@ def dih_data_routine2(dirname,savename,newname,test):
 #
 #Name: dih_data_131_goes_routine
 #
+#Purpose: Runs all necessary data routines to make histograms/plots for all my AIA data (and add new data to data set)
 #
+#Inputs: directory where new files came from -> dirname, ubersavename for new files -> savename, new save string for new files -> newname, list of older file save strings -> savelist, name for new histograms ->histname
 #
+#Outputs: metadata,rawdata for new files, metadata about shared plots, shared plots, histogram and histogram data/metadata
+#
+#Example: final = dih_data_131_goes_routine('/data/george/hwinter/*/Working','aia_data_block','comtest1',['aia_data2_block_comtest4'],'newhist')
+#
+#Written: 8/1/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 def dih_data_131_goes_routine(dirname,savename,newname,savelist,histname):
 	meta_path = '/data/george/dherman/metadata/'
-	save_path = savename + '_' + newname
-	savelist.append(save_path)
-	all_meta = dih_sun_recurs_data_plot(dirname,savename,newname,0)
-	total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ save_path + '_all_human_meta.txt',savename,newname,0)
-	uber_goes_metadatalist = dih_sun_recurs_goes_plot(meta_path + save_path + '_human_meta_131.txt',savename + '_' + newname)
+	if type(savename) == str and type(newname) == str:
+		save_path = savename + '_' + newname
+		savelist.append(save_path)
+		all_meta = dih_sun_recurs_data_plot(dirname,savename,newname,0)
+	for member in savelist:
+		split = member.split('_')
+		save = split[0]+'_'+split[1]+'_'+split[2]
+		new = split[3]
+		#total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ member + '_all_human_meta.txt',save,new,0)
+		uber_goes_metadatalist = dih_sun_recurs_goes_plot(meta_path + member + '_human_meta_131.txt',member)
 	hist_final = dih_hist_goes_131(savelist,histname)
 	return hist_final
 	
