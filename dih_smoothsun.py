@@ -39,6 +39,9 @@ from scipy.io.idl import readsav
 import dih_fft_fcm as fcm
 from dih_goes_csv_reader import dih_goes_csv_checker_event_files
 
+##
+def getKey(item):
+	return item[0]
 #see dih_smoothie for documentation for dih_smooth module
 def dih_smooth(x,beta,num1):
     """ kaiser window smoothing """
@@ -416,12 +419,19 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	meta_datalist = pickle.load(open('/data/george/dherman/metadata/' + savename + '_meta' + str(num) + '.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
+	fits_ev_peak = meta_datalist[10][0]
+	fits_ev_peak = datetime.strptime(fits_ev_peak,'%Y-%m-%dT%H:%M:%S')
 	print str(fits_channel)
 	fits_center = meta_datalist[2]#center of first fits
 	fits_box = meta_datalist[-4]
 	colors = iter(cm.rainbow(np.linspace(0,1,len(datalist[0])))) #creates color table
-	x = datalist[0] #x coordinate data
-	y = datalist[1] #y coordinate data
+	#x,y coordinate data sorting
+	testsort = zip(*[datalist[0],datalist[1]])
+	sorted_data = sorted(testsort, key=getKey)
+	x = np.array(zip(*sorted_data)[0])
+	y = np.array(zip(*sorted_data)[1])
+	xcopy = x
+	x = x - x[0]
 	ycopy = y
 	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
 	yspikeless = spike.dih_dip_picker(yspikeless)#removes ultra noisy dips
@@ -449,6 +459,13 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		window = 7
 	else:
 		print "Bad Channel!"	
+	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+	fits_first = timedelta(seconds = xcopy[0])
+	fits_last = timedelta(seconds = xcopy[-1])
+	fits_begin = fits_time+fits_first
+	fits_end = fits_time+fits_last
+	fits_begin = datetime.strftime(fits_begin,'%Y-%m-%dT%H:%M:%S.%f')
+	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
 	peaklist = argrelextrema(ysmooth,np.greater)#relative max
 	peak = max(ysmooth[(window-1)/2:len(ysmooth)-(window-1)/2])#absolute max ignoring the very ends of the data set
 	maxpeaklist = [i for i, j in enumerate(ysmooth) if j == peak]
@@ -460,7 +477,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		else:
 			plt.plot(x[member],ysmooth[member],'yD',markersize =8)
 			#recreating peak times from time difference data
-			first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+			first_time = datetime.strptime(fits_begin,'%Y-%m-%dT%H:%M:%S.%f')
 			timediff = timedelta(seconds = x[member])
 			peaktime = first_time+timediff
 			relpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
@@ -468,8 +485,10 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	maxpeaktimelist = []
 	flagged_peaktimelist=[]
 	for member in maxpeaklist:
-		first_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
+		first_time = datetime.strptime(fits_begin,'%Y-%m-%dT%H:%M:%S.%f')
 		timediff = timedelta(seconds = x[member])
+		print 'timediff'
+		print timediff
 		peaktime = first_time+timediff
 		if x[member] > 250 and x[member] < x[-1]-250:
 			maxpeaktimelist.append(peaktime.strftime('%Y/%m/%d %H:%M:%S.%f'))
@@ -489,11 +508,20 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	expected = np.array(ysmooth)*np.sum(observed)
 	chi = chisquare(observed,expected)
 	metadatalist = []
-	metadatalist.append(fits_date)
+	metadatalist.append(fits_begin)
 	metadatalist.append(fits_channel)
 	metadatalist.append(fits_center)
 	metadatalist.append(relpeaktimelist)
-	metadatalist.append(maxpeaktimelist)
+	if len(maxpeaktimelist) == 1:
+		max_peak_dt = datetime.strptime(maxpeaktimelist[0],'%Y/%m/%d %H:%M:%S.%f')
+		peakdiff = fits_ev_peak-max_peak_dt
+		peakdiff = peakdiff.total_seconds()
+		if abs(peakdiff) < 900:
+			metadatalist.append(maxpeaktimelist)
+		else:
+			metadatalist.append([])
+	else:
+		metadatalist.append([])	
 	metadatalist.append(ivo_list[num])
 	metadatalist.append(flagged_peaktimelist)
 	smooth_range = max(ysmooth)-min(ysmooth)
@@ -510,13 +538,10 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 		#file_peakflag.close()
 	else:
 		metadatalist.append('no_peakflag')
-	fits_time = datetime.strptime(fits_date,'%Y-%m-%dT%H:%M:%S.%f')
-	fits_range = timedelta(seconds = x[-1])
-	fits_end = fits_time+fits_range
-	fits_end = datetime.strftime(fits_end,'%Y-%m-%dT%H:%M:%S.%f')
 	metadatalist.append(fits_box)
-	metadatalist.append(x)
+	metadatalist.append(list(x))
 	metadatalist.append(list(ysmooth))
+	metadatalist.append(fits_date)
 	metadatalist.append(fits_end)	
 	#pickling of metadata
 	#with open(savename+'_'+newname+'_meta'+str(num)+'.txt','wb') as fff:
@@ -533,10 +558,10 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	#finish up plot characteristics
 	plt.plot(x,y,'b',linewidth = 1.0)
 	plt.plot(x,ysmooth,'r',linewidth = 1.5)
-	plt.title('Lightcurve at'+' '+fits_date+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
-	plt.xlabel('Seconds Since'+' '+fits_date)
+	plt.title('Lightcurve at'+' '+fits_begin+ ' '+ str(fits_channel)+'$\AA$',y=1.07)
+	plt.xlabel('Seconds Since'+' '+fits_begin)
 	plt.ylabel('Arbitrary Flux Units')
-	plt.savefig('/data/george/dherman/sun_plots/'+newname+'_'+fits_date+'_'+savename+str(num)+'.ps')#saves postscript file
+	plt.savefig('/data/george/dherman/sun_plots/'+newname+'_'+fits_begin+'_'+savename+str(num)+'.ps')#saves postscript file
 	return metadatalist
 #
 #Name: dih_sun_recurs_data_plot
@@ -609,7 +634,11 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 #
 #
 #
-		
+
+#
+#
+#
+#		
 def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	raw_files = list(set(os.listdir('/data/george/dherman/rawdata')))
 	print raw_files
@@ -629,7 +658,7 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 		member = ast.literal_eval(member)
 		all_meta_datalist.append(member)
 	for part in all_meta_datalist:
-		if part[0] == file_string:
+		if part[-2] == file_string:
 			meta_datalist = part
 	print meta_datalist						
 	if meta_datalist[7] == 'flag':
@@ -644,6 +673,11 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	fits_center = meta_datalist[2]#center of first fits
 	x = datalist[0] #x coordinate data
 	y = datalist[1] #y coordinate data
+	testsort = zip(*[x,y])
+	sorted_data = sorted(testsort, key=getKey)
+	x = np.array(zip(*sorted_data)[0])
+	y = np.array(zip(*sorted_data)[1])
+	x = x - x[0]
 	ycopy = y
 	y = list(y)
 	yspikeless = spike.dih_spike_picker(y)#removes ultra noisy peaks
@@ -721,6 +755,7 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
 		member_meta = []
 		for guy in member:
+			print guy
 			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0],test)
 			member_meta.append(guy_meta)
 		plt.xlabel('Seconds Since'+' '+member[0])
@@ -737,18 +772,23 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 #
 #Purpose: same as dih_sun_plotter but also focuses in on event bounding box portion of the sun and saves the bounding box information
 #
-#Inputs: dirname = directory containing ivo files, savename = uber string to tie all saved files together
+#Inputs: dirname = directory containing ivo files, savename = uber string to tie all saved files together, cuelist = ivo files to run over or not run
 #
-#Outputs:
-def dih_sun_cropped_plotter(dirname,savename,cuename):
+#Outputs:rawdata,metadata on events
+#
+#Written: 8/1/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+
+def dih_sun_cropped_plotter(dirname,savename,cuelist):
     directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
     fits_list = directory_lists[0]
     ivo_list = directory_lists[1]
     ivos_file = open('/data/george/dherman/map_completed/all_completed_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
-    if type(cuename) == str:
-    	cue_file = open(cuename,'r')
-    	cue_lines = cue_file.readlines()
+    #if type(cuename) == str:
+    	#cue_file = open(cuename,'r')
+    	#cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
     	if idx < 776:
     		continue
@@ -762,10 +802,10 @@ def dih_sun_cropped_plotter(dirname,savename,cuename):
     	if len(completion) > 0:
     		print "ivo already processed"
     		continue
-    	if type(cuename) == str:
-    		cue = [s for s in cue_lines if ivo_string in s]
-    		if len(cue) == 0:
-    			print "ivo not on cue list"
+    	if type(cuelist) == list:
+    		cue = [s for s in cuelist if ivo_string in s]
+    		if len(cue) > 0:
+    			print "ivo on cue list"
     			continue
     	innerdatalist = []
     	#checking for existence of sav file with metadata
