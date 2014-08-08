@@ -411,6 +411,7 @@ def dih_event_goes_select(filename,savename):
 		if len(min_list) > 0:
 			goes_index = min_list[0]
 		else:
+			print "no min"
 			continue
 		target_goes_peak.append(compare_peaks[goes_index])
 		diff_list_131 = []
@@ -444,6 +445,7 @@ def dih_event_goes_select(filename,savename):
 		x_minlist = argrelextrema(np.array(aia_x),np.less)
 		#removes lightcurves whose times are not monotonic
 		if len(x_peaklist[0])>0 or len(x_minlist[0]) >0:
+			print 'wacky times'
 			continue
 		maxa = max(aia_y)
 		maxb = max(goes_y)
@@ -461,9 +463,6 @@ def dih_event_goes_select(filename,savename):
 		for peak in metadata_131[3]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
-			print peak_time
-			print aia_start_time
-			print x_range
 			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
 			if len(x_range_list) > 0:
 				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 8)
