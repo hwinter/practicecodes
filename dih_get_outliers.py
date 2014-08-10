@@ -51,4 +51,7 @@ def dih_track_george(num):
 				stringsav = 'no sav file'
 			nums.append([member,len(list1),stringsav])
 		return zip(*nums)
-		
+#
+#
+#
+#Create line transfer function
