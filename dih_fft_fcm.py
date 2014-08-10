@@ -84,8 +84,8 @@ def dih_get_cropped_map(ev, file_list,savename):
     		out_map_list.append(temp_map)
     		file_AIA_index = file.find('AIA')
     		file_AIA_string = file[file_AIA_index:-5]
-    		if os.path.isfile('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_' + str(idx) + '_cropped.fits') == False:
-    			temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_' + str(idx) + '_cropped.fits', filetype='fits')
+            #if os.path.isfile('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_' + str(idx) + '_cropped.fits') == False:
+            #temp_map.save('/data/george/dherman/sun_maps/'+ file_AIA_string + '_' + savename + '_' + str(idx) + '_cropped.fits', filetype='fits')
     	except ValueError:
     		print 'Truncated fits file!'
     	except IOError:
