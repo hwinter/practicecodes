@@ -29,3 +29,5 @@ printf, unit, real_start
 for i=0,n_elements(goes_time)-1 do printf, unit, new_time[i], goes_flux[i,0]
 close, unit, /all
 end
+;ubs = dih_data_131_goes_routine('/data/george/hwinter/data/Flare_Detective_Data/Event_Stacks/Working','aia_data3_block','goes131pairtest5',['sunnymoney_goes131comtest2','aia_data_block_goes131pairtest','aia_data2_block_goes131pairtest78'],'quattro_test5_131goesbatch')
+;aia_mkmovie, '2014-06-03 09:20','2014-06-03 09:55',[171,131],cutout = [ 897,  1025,  2433 ,  2561], /multi_panel
