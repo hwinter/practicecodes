@@ -564,7 +564,77 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 	plt.savefig('/data/george/dherman/sun_plots/'+newname+'_'+fits_begin+'_'+savename+str(num)+'.ps')#saves postscript file
 	return metadatalist
 #
-
+#
+#
+#Name: dih_sun_recurs_data_plot
+#
+#Purpose: Recurses over files in dirname and performs dih_sun_scratch_plot for each file
+#
+#Inputs: directory containing ivo files, original savename for files, new savename for files (newname), set test to be True to direct files to test directories
+#
+#Outputs: Postscript file for each ivo file, metadata about ps file
+#
+#Example: gah = dih_sun_recurs_data_plot('/Volumes/Scratch/Users/dherman/data','suncurves','test_for_smoothing')
+#
+#Written: 7/14/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
+def dih_sun_recurs_data_plot(dirname,savename,newname,test):
+	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+	fits_list = directory_lists[0]
+	ivo_list = directory_lists[1]
+	savepathmeta = '/data/george/dherman/metadata/'
+	savepathmeta_test = '/data/george/dherman/metadata_test/'
+	savepathraw = '/data/george/dherman/rawdata/'
+	#file_ivo = open('/data/george/dherman/completed/all_completed_ivolist.txt','a')
+	print 'here'
+	print ivo_list
+	#for member in ivo_list:
+		#file_ivo.write(member)
+		#file_ivo.write('\n')
+	#file_ivo.close()
+	if test == 0:
+		file2 = open(savepathmeta + savename + '_' + newname + '_human_meta_corrupted.txt','a')
+		file3 = open(savepathmeta + savename + '_' + newname + '_all_human_meta.txt','a')
+		file4 = open(savepathmeta + savename + '_' + newname + '_human_meta_131.txt','a')
+		file5 = open(savepathmeta + savename + '_' + newname + '_human_meta_peakflag.txt','a')
+	elif test == 1:
+		file2 = open(savepathmeta_test + savename + '_' + newname + '_human_meta_corrupted.txt','a')
+		file3 = open(savepathmeta_test + savename + '_' + newname + '_all_human_meta.txt','a')
+		file4 = open(savepathmeta_test + savename + '_' + newname + '_human_meta_131.txt','a')
+		file5 = open(savepathmeta_test + savename + '_' + newname + '_human_meta_peakflag.txt','a')
+	else:
+		print "Bad Test Keyword!" 
+	list = range(len(ivo_list))
+	all_meta = []
+	for num in list:
+		if os.path.isfile('/data/george/dherman/rawdata/' + savename+str(num)+'.txt') == False or os.path.isfile('/data/george/dherman/metadata/' + savename+'_meta'+str(num)+'.txt') == False:
+			continue
+		else:
+			metadatalist = dih_sun_data_plot(dirname,savename,num,newname)
+			all_meta.append(metadatalist)
+			continue
+	for member in all_meta:
+		#simplejson.dump(member,file3)
+		file3.write(str(member))
+		file3.write('\n')
+		if member[1] == 131:
+			#simplejson.dump(member,file4)
+			file4.write(str(member))
+			file4.write('\n')
+		if member[7] == 'flag':
+			#simplejson.dump(member,file2)
+			file2.write(str(member))
+			file2.write('\n')
+		if member[8] == 'peakflag':
+			#simplejson.dump(member,file5)
+			file5.write(str(member))
+			file5.write('\n')	
+	file2.close()
+	file3.close()
+	file4.close()
+	file5.close()
+	return all_meta
 
 #
 #
