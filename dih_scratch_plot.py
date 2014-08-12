@@ -56,13 +56,14 @@ def getKey(item):
 #
 # 
 def dih_sun_scratch_plot(dirname,savename,num,newname):
-	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
-	fits_list = directory_lists[0]
-	ivo_list = directory_lists[1]
+	#directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+	#fits_list = directory_lists[0]
+	#ivo_list = directory_lists[1]
 	datalist = pickle.load(open('/Volumes/Scratch/Users/dherman/sundata/rawdata' + savename + str(num) + '.txt','rb'))
 	meta_datalist = pickle.load(open('/Volumes/Scratch/Users/dherman/sundata/metadata' + savename + '_meta' + str(num) + '.txt','rb'))
 	fits_date = meta_datalist[0]#datetime for first fits file in dirpath
 	fits_channel = meta_datalist[1]#channel for first fits
+	ivo = meta_datalist[5]
 	fits_ev_peak = meta_datalist[10][0]
 	fits_ev_peak = datetime.strptime(fits_ev_peak,'%Y-%m-%dT%H:%M:%S')
 	print str(fits_channel)
@@ -166,7 +167,7 @@ def dih_sun_scratch_plot(dirname,savename,num,newname):
 			metadatalist.append([])
 	else:
 		metadatalist.append([])	
-	metadatalist.append(ivo_list[num])
+	metadatalist.append(ivo)
 	metadatalist.append(flagged_peaktimelist)
 	smooth_range = max(ysmooth)-min(ysmooth)
 	#consider raising .75 to .9
@@ -231,15 +232,15 @@ def dih_sun_scratch_plot(dirname,savename,num,newname):
 #
 #
 def dih_sun_recurs_scratch_plot(dirname,savename,newname,test):
-	directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
-	fits_list = directory_lists[0]
-	ivo_list = directory_lists[1]
+	#directory_lists = finder.dih_dir_finder(dirname)#gets fits files and ivo files
+	#fits_list = directory_lists[0]
+	#ivo_list = directory_lists[1]
 	savepathmeta = '/Volumes/Scratch/Users/dherman/sundata/metadata/'
 	savepathmeta_test = '/Volumes/Scratch/Users/dherman/sundata/metadata_test/'
 	savepathraw = '/Volumes/Scratch/Users/dherman/sundata/rawdata/'
 	#file_ivo = open('/data/george/dherman/completed/all_completed_ivolist.txt','a')
 	print 'here'
-	print ivo_list
+	#print ivo_list
 	#for member in ivo_list:
 		#file_ivo.write(member)
 		#file_ivo.write('\n')
@@ -256,7 +257,7 @@ def dih_sun_recurs_scratch_plot(dirname,savename,newname,test):
 		file5 = open(savepathmeta_test + savename + '_' + newname + '_human_meta_peakflag.txt','a')
 	else:
 		print "Bad Test Keyword!" 
-	list = range(len(ivo_list))
+	list = range(0,5000)
 	all_meta = []
 	for num in list:
 		if os.path.isfile('/Volumes/Scratch/Users/dherman/sundata/rawdata' + savename+str(num)+'.txt') == False or os.path.isfile('/Volumes/Scratch/Users/dherman/sundata/metadata' + savename+'_meta'+str(num)+'.txt') == False:
