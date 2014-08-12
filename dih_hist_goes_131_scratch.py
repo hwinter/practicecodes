@@ -81,10 +81,11 @@ def dih_hist_goes_131_scratch(filelist,savename):
 	ax = f.add_subplot(111)
 	maxhistprimary = math.ceil(max(hist_data_no_copy)/12)*12
 	minhistprimary = math.floor(min(hist_data_no_copy)/12)*12
-	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(int(minhistprimary),int(maxhistprimary + 1),12) ,histtype = 'stepfilled')
+	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(-600,601,12) ,histtype = 'stepfilled')
 	sku = skew(hist_data_no_copy)
 	kurt = kurtosis(hist_data_no_copy)
 	standerr = np.std(hist_data_no_copy)
+	avg = np.mean(hist_data_no_copy)
 	final = []
 	final.append('GOES and 131 Histogram data: n,bins,skew,kurtosis,standard deviation')
 	final.append(tuple(n))
@@ -92,12 +93,15 @@ def dih_hist_goes_131_scratch(filelist,savename):
 	final.append(sku)
 	final.append(kurt)
 	final.append(standerr)
+	final.append(avg)
 	P.setp(patches, 'facecolor','b','alpha',0.75)
 	P.xlabel('Time Difference between GOES and 131 peak in seconds')
 	P.ylabel('Number of Peaks')
 	P.title('Histogram of GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
 	P.text(.85,.9,'skew = ' + str(round(sku,3)),fontsize =12, ha='center',va='center',transform = ax.transAxes)
 	P.text(.85,.8,'kurtosis = ' + str(round(kurt,3)),fontsize =12, ha='center',va='center',transform = ax.transAxes)
+	P.text(.85,.7,'sigma = ' + str(round(standerr,3)),fontsize = 12, ha = 'center',va = 'center', transform = ax.transAxes)
+	P.text(.85,.6,'mean = ' + str(round(avg,3)),fontsize = 12, ha = 'center', va = 'center', transform = ax.transAxes)
 	P.savefig('/Volumes/Scratch/Users/dherman/sundata/sun_plots/' + savename + '_131_goes_hist.ps')
 	hist_data_file1 = open(savepathmeta + savename + '_131_goes_hist_data.txt','w')
 	hist_data_file2 = open(savepathmeta + savename + '_131_goes_hist_metadata.txt','w')
@@ -110,14 +114,16 @@ def dih_hist_goes_131_scratch(filelist,savename):
 	goes_C = [j for j in goes_class_set if j[-1] < 10**(-5) and j[-1] > 10**(-6)]
 	goes_M = [j for j in goes_class_set if j[-1] < 10**(-4) and j[-1] > 10**(-5)]
 	goes_X = [j for j in goes_class_set if j[-1] < 10**(-3) and j[-1] > 10**(-4)]
-	goes_all = [goes_A,goes_B,goes_C,goes_M,goes_X]
+	goes_C_low = [j for j in goes_class_set if j[-1] < 5*(10**(-6)) and j[-1] > 10**(-6)]
+	goes_C_high = [j for j in goes_class_set if j[-1] < 10**(-5) and j[-1] > 5*(10**(-6))]
+	goes_all = [goes_A,goes_B,goes_C,goes_M,goes_X,goes_C_low,goes_C_high]
 	print len(goes_A)
 	print len(goes_B)
 	print len(goes_C)
 	print len(goes_M)
 	print len(goes_X)
 	print 'lengths'
-	xTickMarks = ['A','B','C','M','X']
+	xTickMarks = ['A','B','C','M','X','C 1.0-5.0','C 5.0-9.0']
 	for idx,member in enumerate(goes_all):
 		if len(member) > 0:
 			goes_columns = zip(*member)
@@ -125,10 +131,11 @@ def dih_hist_goes_131_scratch(filelist,savename):
 			ax = f.add_subplot(111)
 			maxhist = math.ceil(max(goes_columns[-2])/12)*12
 			minhist = math.floor(min(goes_columns[-2])/12)*12
-			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(int(minhist),int(maxhist+1),12) ,histtype = 'stepfilled')
+			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(-600,601,12) ,histtype = 'stepfilled')
 			sku = skew(goes_columns[-2])
 			kurt = kurtosis(goes_columns[-2])
 			standerr = np.std(goes_columns[-2])
+			avg = np.mean(goes_columns[-2])
 			subfinal = []
 			subfinal.append('GOES and 131 Histogram data: n,bins')
 			subfinal.append(tuple(n))
@@ -136,13 +143,18 @@ def dih_hist_goes_131_scratch(filelist,savename):
 			subfinal.append(sku)
 			subfinal.append(kurt)
 			subfinal.append(standerr)
+			subfinal.append(avg)
 			P.setp(patches, 'facecolor','b','alpha',0.75)
 			P.xlabel('Time Difference between GOES and 131 peak in seconds')
 			P.ylabel('Number of Peaks')
+			ax.set_xlim(-600,600)
+			ax.set_ylim(0,30)
 			P.title('Histogram of class ' + xTickMarks[idx] + ' GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
-			P.savefig('/Volumes/Scratch/Users/dherman/sundata/sun_plots/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist.ps')
 			P.text(.85,.9,'skew = ' + str(round(sku,3)),fontsize =12, ha='center',va='center',transform = ax.transAxes)
 			P.text(.85,.8,'kurtosis = ' + str(round(kurt,3)),fontsize =12, ha='center',va='center',transform = ax.transAxes)
+			P.text(.85,.7,'sigma = ' + str(round(standerr,3)),fontsize = 12, ha = 'center',va = 'center', transform = ax.transAxes)
+			P.text(.85,.6,'mean = ' + str(round(avg,3)),fontsize = 12, ha = 'center', va = 'center', transform = ax.transAxes)
+			P.savefig('/Volumes/Scratch/Users/dherman/sundata/sun_plots/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist.ps')
 			hist_data_file_a = open(savepathmeta + savename + '_131_goes_' + xTickMarks[idx] + '_hist_data.txt','w')
 			hist_data_file_b = open(savepathmeta + savename + '_131_goes_' + xTickMarks[idx] + '_hist_metadata.txt','w')
 			hist_data_file_a.write(str(goes_columns))
