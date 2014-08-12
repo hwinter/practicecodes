@@ -797,7 +797,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuelist):
     	#cue_file = open(cuename,'r')
     	#cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
-    	if idx < 776 or idx == 2539:
+    	if idx < 776 or idx == 2539 or idx == 1521:
     		continue
     	member_fits = glob.glob(dirpath + '/*.fits')
     	if len(member_fits) < 100 or len(member_fits) > 600:
