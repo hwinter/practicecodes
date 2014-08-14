@@ -7,7 +7,12 @@ import sunpy
 import glob
 import sunpy.map
 import numpy as np
-
+#
+#
+#Based on sunpy blog by Jack Ireland
+#
+#
+#
 def _blit_draw(self, artists, bg_cache):
     # Handles blitted drawing, which renders only the artists given instead
     # of the entire figure.
@@ -29,16 +34,18 @@ def _blit_draw(self, artists, bg_cache):
         # ax.figure.canvas.blit(ax.bbox)
         ax.figure.canvas.blit(ax.figure.bbox)
 
-# MONKEY PATCH!!
-animation.ArtistAnimation._blit_draw = _blit_draw
+
+
 
 def dih_sunmovie1(imagedir,savename):
 	# Set up formatting for the movie files
+    # MONKEY PATCH!!
+    #animation.ArtistAnimation._blit_draw = _blit_draw
     Writer = animation.writers['ffmpeg']
     writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
  
     # Get some data
-    filenames = sorted(os.listdir(imagedir))
+    filenames = sorted(os.listdir(imagedir))[2:]
     print filenames 
     fig = plt.figure("An SDO movie")
     img = []
