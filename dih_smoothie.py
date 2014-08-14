@@ -37,11 +37,15 @@ def dih_smooth(x,beta):
 #
 #
 #
+
 #Name:dih_plotter2
 #
 #Purpose:attempt at using kaiser smoothed data to find peaks and plot them
 #
 #Inputs: directory string, savename string, number of files to read from directory
+#
+#Keywords: kaiser = true -gives kaiser smoothing, boxcar = true -gives boxcar smoothing
+#both = true -gives both kaiser then boxcar
 #
 #Outputs: plot of smoothed data from dirname, returns raw data
 #
@@ -50,23 +54,27 @@ def dih_smooth(x,beta):
 #Written:6/23/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-def dih_plotter2(dirname,savename,numplot):
+def dih_plotter2(dirname,savename,numplot,kaiser,boxcar,both):
     inlist = dih_tablereader(dirname)
     plotlist = inlist[0:numplot]
     colors = iter(cm.rainbow(np.linspace(0,1,len(plotlist)))) #creates color table
     for memberlist in plotlist:
         x = memberlist[0] #x coordinate data
         y = memberlist[1] #y coordinate data
-        ysmooth = dih_smooth(y,14)#kaiser smoothing
-        ysmoother = dih_boxcar(ysmooth)#boxcar smoothing
-        peaklist =signal.find_peaks_cwt(ysmoother, np.arange(5,20))#continuous wavelet transformation
-        plt.plot(x,ysmoother,color = next(colors))
+        if kaiser == 1:
+        	ysmooth = dih_smooth(y,14)#kaiser smoothing
+        if boxcar == 1:
+        	ysmooth = dih_boxcar(y)#boxcar smoothing
+        if both == 1:
+        	ysmooth = dih_boxcar(dih_smooth(y,14))
+        peaklist =signal.find_peaks_cwt(ysmooth, np.arange(4,30))#continuous wavelet transformation
+        plt.plot(x,ysmooth,color = next(colors))
         for num in peaklist:
-            plt.plot(x[num],ysmoother[num],'gD')#places markers on peaks
-        peak = max(ysmoother)
-        peaklist2 = [i for i, j in enumerate(ysmoother) if j == peak]#places markers on absolute peaks
+            plt.plot(x[num],ysmooth[num],'gD')#places markers on peaks
+        peak = max(ysmooth)
+        peaklist2 = [i for i, j in enumerate(ysmooth) if j == peak]#places markers on absolute peaks
         for num in peaklist2:
-            plt.plot(x[num],ysmoother[num],'rD')
+            plt.plot(x[num],ysmooth[num],'rD')
 
 #finish up plot characteristics
     plt.title('Super Most Awesome Graph!')
