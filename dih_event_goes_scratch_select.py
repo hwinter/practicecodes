@@ -128,40 +128,40 @@ def dih_event_goes_scratch_select(filename,savename):
 		goes_x_adj = list(np.array(goes_x) - start_num)
 		fig = plt.figure()
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
-		plt.plot(goes_x,goes_y,'b',linewidth = 1.0, label = 'GOES 1-8 $\AA$')
-		plt.plot(aia_x,aia_y,'r',linewidth = 1.0, label = 'AIA 131 $\AA$')
+		plt.plot(goes_x,goes_y,'g',linewidth = 1.2, label = 'GOES 1-8 $\AA$')
+		plt.plot(aia_x,aia_y,'k',linewidth = 1.2, label = 'AIA 131 $\AA$')
 		for peak in metadata_131[3]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
 			if len(x_range_list) > 0:
-				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 8)
+				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'yD', markersize = 9)
 		for peak in metadata_131[4]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
 			if len(x_range_list) > 0:
-				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
+				plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 9)
 		for peak in metadata_goes[3]:
 			print metadata_goes[3]
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 			if len(x_range_list) > 0:
-				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'yD', markersize = 8)
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'yD', markersize = 9)
 		for peak in metadata_goes[4]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-goes_start_time).total_seconds()
 			x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 			if len(x_range_list) > 0:
-				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 8)
+				plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'gD', markersize = 9)
 		if key == 137:
 			for peak in target_goes_peak:
 				peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 				x_range = (peak_time-goes_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 				if len(x_range_list) > 0:
-					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 9)
 				end_result.append(goes_copy_y[x_range_list[0]])
 		if key == 11:
 			for peak in target_goes_peak:
@@ -169,7 +169,7 @@ def dih_event_goes_scratch_select(filename,savename):
 				x_range = (peak_time-goes_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(goes_x) if j == x_range]
 				if len(x_range_list) > 0:
-					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 8)
+					plt.plot(goes_x_adj[x_range_list[0]],goes_y[x_range_list[0]],'ro', markersize = 9)
 					end_result.append(goes_copy_y[x_range_list[0]])
 				else:
 					end_result.append('cannot find goes')	
@@ -178,7 +178,7 @@ def dih_event_goes_scratch_select(filename,savename):
 				x_range = (peak_time-aia_start_time).total_seconds()
 				x_range_list = [i for i, j in enumerate(aia_x) if j == x_range]
 				if len(x_range_list) > 0:
-					plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 8)
+					plt.plot(aia_x[x_range_list[0]],aia_y[x_range_list[0]],'ro', markersize = 9)
 		total_end_result.append(end_result)
 		end_file = open(savepathmeta + savename + '_all_human_meta_goes131_compared.txt','a')
 		simplejson.dump(end_result,end_file)
