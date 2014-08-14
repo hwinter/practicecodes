@@ -1,6 +1,5 @@
 import pickle
 import dih_boxcar as d
-import dih_smoothsun as ddd
 import dih_spike_picker as dd
 import matplotlib.pyplot as plt
 from scipy import signal
