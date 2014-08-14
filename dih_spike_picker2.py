@@ -43,7 +43,7 @@ def dih_spike_picker2(inarray):
 		else:
 			print "bad index"
 		subdiff = max(crestarray) - min(crestarray)
-		if subdiff > .2*diff:
+		if subdiff > .4*diff:
 			for member in numlist:
 				inarray[member] = min(crestarray)
 			print 'Yes a false spike'
