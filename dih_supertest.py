@@ -17,12 +17,13 @@ def dih_target_tester(filename,num1,num2):
 	domain = list[num1][0]
 	target = dd.dih_spike_picker(target)
 	target = dd.dih_dip_picker(target)
-	window = 19
-	endrange = dih_boxavg_recurs(target,window,7)
+	window = 5
+	endrange = dih_boxavg_recurs(target,window,50)
 	targetlist = []
 	targetlist.append(domain)
 	targetlist.append(endrange)
 	diplist = argrelextrema(endrange[window:len(target)-window],np.less)
+	print diplist
 	peaklist = argrelextrema(endrange[window:len(target)-window], np.greater)
 	x_short = domain[window:len(target)-window]
 	y_short = target[window:len(target)-window]
@@ -33,7 +34,7 @@ def dih_target_tester(filename,num1,num2):
 	plt.plot(domain,endrange,color = 'g')
 	diff = max(target)-min(target)
 	for idx,member in enumerate(sub_y_list):
-		member = dd.dih_spike_picker(member)
+		member = dd.dih_spike_picker3(member)
 		subpeak = max(member)
 		if (subpeak-min(target))>.1*diff:
 			subpeaklist = [i for i, j in enumerate(member) if j== subpeak]
@@ -41,5 +42,8 @@ def dih_target_tester(filename,num1,num2):
 				plt.plot(sub_x_list[idx][num],member[num],'rD')
 		else:
 			print 'Bad Peak!'
+	plt.xlabel('Seconds since first data point')
+	plt.ylabel('Arbitrary Flux Units')
+	plt.title('Lightcurve for '+filename+str(num1))
 	plt.savefig('test'+str(num2)+'.ps')
 	return targetlist
