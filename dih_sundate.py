@@ -16,7 +16,7 @@ from datetime import datetime
 def dih_sunfirst(dirname):
 	filelist = glob.glob(dirname+"/*.fits")
 	my_map = sunpy.map.Map(filelist[0])
-	return my_map.date
+	return [my_map.date,my_map.center,my_map.measurement]
 #
 #
 #
