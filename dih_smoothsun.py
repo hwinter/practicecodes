@@ -522,7 +522,7 @@ def dih_sun_data_plot(dirname,savename,num,newname):
 			metadatalist.append([])
 	else:
 		metadatalist.append([])	
-	metadatalist.append(ivo_list[num])
+	metadatalist.append(meta_datalist[5])
 	metadatalist.append(flagged_peaktimelist)
 	smooth_range = max(ysmooth)-min(ysmooth)
 	#consider raising .75 to .9
@@ -605,7 +605,7 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 		file5 = open(savepathmeta_test + savename + '_' + newname + '_human_meta_peakflag.txt','a')
 	else:
 		print "Bad Test Keyword!" 
-	list = range(len(ivo_list))
+	list = range(0,5000)
 	all_meta = []
 	for num in list:
 		if os.path.isfile('/data/george/dherman/rawdata/' + savename+str(num)+'.txt') == False or os.path.isfile('/data/george/dherman/metadata/' + savename+'_meta'+str(num)+'.txt') == False:
@@ -639,19 +639,29 @@ def dih_sun_recurs_data_plot(dirname,savename,newname,test):
 #
 #
 #
-
+#Name: dih_sun_shared_plot
+#
+#Purpose: overplot events that occur near each other in time
+#
+#Inputs: file_string is a time string for a time to plot nearby events for, savename is the overarching uber string from dih_sun_plotter, newname is the attached savestring that comes from later dih_sun_recurs_data_plot, if test = 1 files are directed to test folders in george
+#
+#Outputs: shared plot postscripts
+#
+#Ex: gah = dih_sun_shared_plot('2012/04/04T12:00:00.00','uber','test',1')
+#
+#Written: 7/10/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 #
-#
-#		
+ 		
 def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	raw_files = list(set(os.listdir('/data/george/dherman/rawdata')))
-	print raw_files
 	my_file = []
 	for file in raw_files:
 		if file_string in file:
 			my_file.append(file)
-	print my_file		
+	print 'blah'
+	print my_file
+	print type(my_file)		
 	datalist = zip(*dih_filegrab('/data/george/dherman/rawdata/' + my_file[0]))
 	if test == 1:
 		meta_datalist_file = open('/data/george/dherman/metadata_test/' + savename+'_'+ newname +'_all_human_meta.txt','r')
@@ -660,8 +670,12 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 	meta_datalist_lines = meta_datalist_file.readlines()
 	all_meta_datalist = []
 	for member in meta_datalist_lines:
-		member = ast.literal_eval(member)
-		all_meta_datalist.append(member)
+		print member
+		try:
+			member = ast.literal_eval(member)
+			all_meta_datalist.append(member)
+		except ValueError:
+			continue
 	for part in all_meta_datalist:
 		if part[-2] == file_string:
 			meta_datalist = part
@@ -760,7 +774,9 @@ def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
 		member_meta = []
 		for guy in member:
+			print 'first'
 			print guy
+			print 'here'
 			guy_meta = dih_sun_shared_plot(guy,savename,newname,member[0],test)
 			member_meta.append(guy_meta)
 		plt.xlabel('Seconds Since'+' '+member[0])
@@ -791,7 +807,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuelist):
     ivo_list = directory_lists[1]
     savepathmeta = '/Volumes/Scratch/Users/dherman/sundata/metadata'
     savepathraw = '/Volumes/Scratch/Users/dherman/sundata/rawdata'
-    ivos_file = open('/home/dherman/Documents/all_completed2_ivolist.txt','r')#gets already processed ivo files
+    ivos_file = open('/data/george/dherman/map_completed/all_completed2_ivolist.txt','r')#gets already processed ivo files
     lines_ivo = ivos_file.readlines()
     #if type(cuename) == str:
     	#cue_file = open(cuename,'r')
