@@ -1,10 +1,11 @@
 import numpy as np
 import os
-import dih_smoothsun
 import simplejson
 import pickle
 from dih_sun_data_goes_scratch_plot import dih_sun_recurs_goes_scratch_plot
 from dih_hist_goes_131_scratch import dih_hist_goes_131_scratch
+from dih_smoothsun import dih_sun_recurs_shared_plot
+
 #
 #
 #
@@ -31,13 +32,13 @@ def dih_scratch_routine(dirname,savelist1,savelist2,histname):
 		split = member.split('_')
 		save = split[0]+'_'+split[1]+'_'+split[2]
 		new = split[3]
-		uber_goes_metadatalist = dih_sun_recurs_goes_scratch_plot(meta_path2 + member + '_human_meta_131.txt',member)
+		#uber_goes_metadatalist = dih_sun_recurs_goes_scratch_plot(meta_path2 + member + '_human_meta_131.txt',member)
 	for member in savelist2:
 		split = member.split('_')
 		save = split[0]+'_'+split[1]+'_'+split[2]
 		new = split[3]
-		#total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ member + '_all_human_meta.txt',save,new,0)
-		uber_goes_metadatalist = dih_sun_recurs_goes_scratch_plot(meta_path + member + '_human_meta_131.txt',member)
+		total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ member + '_all_human_meta.txt',save,new,0)
+		#uber_goes_metadatalist = dih_sun_recurs_goes_scratch_plot(meta_path + member + '_human_meta_131.txt',member)
 	savelist = savelist1 + savelist2
 	hist_final = dih_hist_goes_131_scratch(savelist,histname)
 	return hist_final
