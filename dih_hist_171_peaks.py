@@ -240,7 +240,9 @@ def dih_hist_crop_events(filename1,savename,channel1,channel2):
 #Written: 7/31/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 def dih_hist_goes_131(filelist,savename):
+	#get data
 	all_data = dih_event_goes_select('/data/george/dherman/metadata/' + filelist[0] + '_all_human_meta_131_goes.txt',savename)
+	#get more data
 	for idx,member in enumerate(filelist):
 		if idx < 1:
 			continue
@@ -254,6 +256,7 @@ def dih_hist_goes_131(filelist,savename):
 	goes_time_set = list(set(end_columns[1]))
 	goes_class_set = []
 	end_hist_data_no_copy = []
+	#get rid of copies
 	for member in goes_time_set:
 		test_list = []
 		for idx,pair in enumerate(end_hist_data):
@@ -266,6 +269,7 @@ def dih_hist_goes_131(filelist,savename):
 	outlier_file = open('/data/george/dherman/metadata/hist_outliers.txt','r')
 	outliers = outlier_file.readlines()
 	outlierlist = []
+	#get rid of flagged outliers
 	for member in outliers:
 		member = ast.literal_eval(member)
 		outlierlist.append(member)
@@ -278,6 +282,7 @@ def dih_hist_goes_131(filelist,savename):
 	hist_data_no_copy = []
 	for member in end_hist_data_no_copy:
 		hist_data_no_copy.append(member[-2])
+	#histogram configuration
 	f = P.figure()
 	ax = f.add_subplot(111)
 	maxhistprimary = math.ceil(max(hist_data_no_copy)/25)*25
@@ -306,6 +311,7 @@ def dih_hist_goes_131(filelist,savename):
 	hist_data_file2.write(str(final))
 	hist_data_file1.close()
 	hist_data_file2.close()
+	#create goes classes
 	goes_A = [j for j in end_hist_data_no_copy if j[-1] < 10**(-7)]
 	goes_B = [j for j in end_hist_data_no_copy if j[-1] < 10**(-6) and j[-1] > 10**(-7)]
 	goes_C = [j for j in end_hist_data_no_copy if j[-1] < 10**(-5) and j[-1] > 10**(-6)]
@@ -319,6 +325,7 @@ def dih_hist_goes_131(filelist,savename):
 	print len(goes_X)
 	print 'lengths'
 	xTickMarks = ['A','B','C','M','X']
+	#populate goes class histograms
 	for idx,member in enumerate(goes_all):
 		if len(member) > 0:
 			goes_columns = zip(*member)
