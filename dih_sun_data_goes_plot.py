@@ -158,6 +158,7 @@ def dih_sun_recurs_goes_plot(file_131,savename):
 			month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 			start_month = month_list[start_time.month - 1]
 			end_month = month_list[end_time.month - 1]
+			#converting to goes suitable times
 			start_string = datetime.strftime(start_time,'%d-'+start_month+'-%Y %H:%M:%S.%f')
 			end_string = datetime.strftime(end_time,'%d-'+end_month+'-%Y %H:%M:%S.%f')
 			columns = dih_run_idl_goes_script(start_string,end_string,'/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt')
