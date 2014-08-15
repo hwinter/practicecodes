@@ -306,11 +306,11 @@ def dih_hist_goes_131(filelist,savename):
 	hist_data_file2.write(str(final))
 	hist_data_file1.close()
 	hist_data_file2.close()
-	goes_A = [j for j in goes_class_set if j[-1] < 10**(-7)]
-	goes_B = [j for j in goes_class_set if j[-1] < 10**(-6) and j[-1] > 10**(-7)]
-	goes_C = [j for j in goes_class_set if j[-1] < 10**(-5) and j[-1] > 10**(-6)]
-	goes_M = [j for j in goes_class_set if j[-1] < 10**(-4) and j[-1] > 10**(-5)]
-	goes_X = [j for j in goes_class_set if j[-1] < 10**(-3) and j[-1] > 10**(-4)]
+	goes_A = [j for j in end_hist_data_no_copy if j[-1] < 10**(-7)]
+	goes_B = [j for j in end_hist_data_no_copy if j[-1] < 10**(-6) and j[-1] > 10**(-7)]
+	goes_C = [j for j in end_hist_data_no_copy if j[-1] < 10**(-5) and j[-1] > 10**(-6)]
+	goes_M = [j for j in end_hist_data_no_copy if j[-1] < 10**(-4) and j[-1] > 10**(-5)]
+	goes_X = [j for j in end_hist_data_no_copy if j[-1] < 10**(-3) and j[-1] > 10**(-4)]
 	goes_all = [goes_A,goes_B,goes_C,goes_M,goes_X]
 	print len(goes_A)
 	print len(goes_B)
