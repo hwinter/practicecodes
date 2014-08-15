@@ -136,7 +136,7 @@ def dih_data_131_goes_routine(dirname,savename,newname,savelist,histname):
 		split = member.split('_')
 		save = split[0]+'_'+split[1]+'_'+split[2]
 		new = split[3]
-		#total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ member + '_all_human_meta.txt',save,new,0)
+		total_shared_meta = dih_sun_recurs_shared_plot(meta_path+ member + '_all_human_meta.txt',save,new,0)
 		uber_goes_metadatalist = dih_sun_recurs_goes_plot(meta_path + member + '_human_meta_131.txt',member)
 	hist_final = dih_hist_goes_131(savelist,histname)
 	return hist_final
