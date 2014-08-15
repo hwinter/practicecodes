@@ -4,6 +4,19 @@ from datetime import timedelta
 #
 #Needs Docs!
 #
+#Name: dih_create_goes_times
+#
+#Purpose: takes times created by IDL goes finder and puts them in '%d-%m-%Y %H:%M:%S.%f' format
+#
+#Inputs: list of GOES times
+#
+#Outputs: list of AIA suitable times
+#
+#Examples gah = dih_create_goes_times(['01-May-2012 00:00:00.00'])
+#
+#Written: 8/1/14 Dan Herman daniel.herman@cfa.harvard.edu
+#
+#
 #
 def dih_create_goes_times(time_list):
 	month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
