@@ -462,6 +462,7 @@ def dih_event_goes_select(filename,savename):
 		fig =fig.add_axes([0.1, 0.1, 0.6, 0.75])
 		plt.plot(goes_x,goes_y,'b',linewidth = 1.0, label = 'GOES 1-8 $\AA$')
 		plt.plot(aia_x,aia_y,'r',linewidth = 1.0, label = 'AIA 131 $\AA$')
+		#plot peaks
 		for peak in metadata_131[3]:
 			peak_time = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			x_range = (peak_time-aia_start_time).total_seconds()
