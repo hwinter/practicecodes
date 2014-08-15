@@ -254,20 +254,32 @@ def dih_hist_goes_131(filelist,savename):
 	goes_time_set = list(set(end_columns[1]))
 	goes_class_set = []
 	end_hist_data_no_copy = []
-	hist_data_no_copy = []
 	for member in goes_time_set:
 		test_list = []
-		test_list2 =[]
 		for idx,pair in enumerate(end_hist_data):
 			if pair[1] == member:
 				test_list.append(pair)
-				test_list2.append(hist_data[idx])
 			else:
 				continue
 		end_hist_data_no_copy.append(test_list[0])
-		hist_data_no_copy.append(test_list2[0])
 		goes_class_set.append(test_list[0])
-	P.figure()
+	outlier_file = open('/data/george/dherman/metadata/hist_outliers.txt','r')
+	outliers = outlier_file.readlines()
+	outlierlist = []
+	for member in outliers:
+		member = ast.literal_eval(member)
+		outlierlist.append(member)
+	outlier_indices = []
+	for idx,member in enumerate(end_hist_data_no_copy):
+		for guy in outlierlist:
+			if set(guy) == set(member):
+				outlier_indices.append(idx)
+	end_hist_data_no_copy = [i for j, i in enumerate(end_hist_data_no_copy) if j not in outlier_indices]
+	hist_data_no_copy = []
+	for member in end_hist_data_no_copy:
+		hist_data_no_copy.append(member[-2])
+	f = P.figure()
+	ax = f.add_subplot(111)
 	maxhistprimary = math.ceil(max(hist_data_no_copy)/25)*25
 	minhistprimary = math.floor(min(hist_data_no_copy)/25)*25
 	n, bins, patches = P.hist(hist_data_no_copy,bins = np.arange(int(minhistprimary),int(maxhistprimary + 1),25) ,histtype = 'stepfilled')
@@ -285,8 +297,8 @@ def dih_hist_goes_131(filelist,savename):
 	P.xlabel('Time Difference between GOES and 131 peak in seconds')
 	P.ylabel('Number of Peaks')
 	P.title('Histogram of GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
-	P.text(.9,.9,'skew = ' + str(sku),fontsize =12, ha='center',va='center')
-	P.text(.9,.8,'kurtosis = ' + str(kurt),fontsize =12, ha='center',va='center')
+	P.text(.9,.9,'skew = ' + str(sku),fontsize =12, ha='center',va='center',transform = ax.transAxes)
+	P.text(.9,.8,'kurtosis = ' + str(kurt),fontsize =12, ha='center',va='center',transform = ax.transAxes)
 	P.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_hist.ps')
 	hist_data_file1 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_data.txt','w')
 	hist_data_file2 = open('/data/george/dherman/metadata/' + savename + '_131_goes_hist_metadata.txt','w')
@@ -310,7 +322,8 @@ def dih_hist_goes_131(filelist,savename):
 	for idx,member in enumerate(goes_all):
 		if len(member) > 0:
 			goes_columns = zip(*member)
-			P.figure()
+			f = P.figure()
+			ax = f.add_subplot(111)
 			maxhist = math.ceil(max(goes_columns[-2])/12)*12
 			minhist = math.floor(min(goes_columns[-2])/12)*12
 			n, bins, patches = P.hist(goes_columns[-2],bins = np.arange(int(minhist),int(maxhist+1),12) ,histtype = 'stepfilled')
@@ -329,8 +342,8 @@ def dih_hist_goes_131(filelist,savename):
 			P.ylabel('Number of Peaks')
 			P.title('Histogram of class ' + xTickMarks[idx] + ' GOES 1-8 $\AA$ and AIA 131 $\AA$ Separations')
 			P.savefig('/home/dherman/Documents/sun_plots/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist.ps')
-			P.text(.9,.9,'skew = ' + str(sku),fontsize =12, ha='center',va='center')
-			P.text(.9,.8,'kurtosis = ' + str(kurt),fontsize =12, ha='center',va='center')
+			P.text(.9,.9,'skew = ' + str(sku),fontsize =12, ha='center',va='center',transform = ax.transAxes)
+			P.text(.9,.8,'kurtosis = ' + str(kurt),fontsize =12, ha='center',va='center',transform = ax.transAxes)
 			hist_data_file_a = open('/data/george/dherman/metadata/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist_data.txt','w')
 			hist_data_file_b = open('/data/george/dherman/metadata/' + savename + '_131_goes_' + xTickMarks[idx] + '_hist_metadata.txt','w')
 			hist_data_file_a.write(str(goes_columns))
@@ -412,6 +425,7 @@ def dih_hist_goes_131_scratch(filelist,savename):
 	sku = skew(hist_data_no_copy)
 	kurt = kurtosis(hist_data_no_copy)
 	standerr = np.std(hist_data_no_copy)
+	avg = np.mean(hist_data_no_copy)
 	final = []
 	final.append('GOES and 131 Histogram data: n,bins,skew,kurtosis,standard deviation')
 	final.append(tuple(n))
@@ -419,6 +433,7 @@ def dih_hist_goes_131_scratch(filelist,savename):
 	final.append(sku)
 	final.append(kurt)
 	final.append(standerr)
+	final.append(avg)
 	P.setp(patches, 'facecolor','b','alpha',0.75)
 	P.xlabel('Time Difference between GOES and 131 peak in seconds')
 	P.ylabel('Number of Peaks')
@@ -455,6 +470,7 @@ def dih_hist_goes_131_scratch(filelist,savename):
 			sku = skew(goes_columns[-2])
 			kurt = kurtosis(goes_columns[-2])
 			standerr = np.std(goes_columns[-2])
+			avg = np.mean(goes_columns[-2])
 			subfinal = []
 			subfinal.append('GOES and 131 Histogram data: n,bins')
 			subfinal.append(tuple(n))
@@ -462,6 +478,7 @@ def dih_hist_goes_131_scratch(filelist,savename):
 			subfinal.append(sku)
 			subfinal.append(kurt)
 			subfinal.append(standerr)
+			subfinal.append(avg)
 			P.setp(patches, 'facecolor','b','alpha',0.75)
 			P.xlabel('Time Difference between GOES and 131 peak in seconds')
 			P.ylabel('Number of Peaks')
