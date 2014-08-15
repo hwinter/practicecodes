@@ -385,6 +385,7 @@ def dih_event_goes_select(filename,savename):
 	for member in meta_lines:
 		member = ast.literal_eval(member)
 		metadata_131 = member[0]
+		#get rid of flags
 		if metadata_131[-5] == 'flag':
 			print 'flag spotted'
 			continue
@@ -400,6 +401,7 @@ def dih_event_goes_select(filename,savename):
 		diff_list = []
 		abs_diff_list = []
 		target_goes_peak = []
+		#compare the peaks by time difference
 		for peak in compare_peaks:
 			peak_dt = datetime.strptime(peak,'%Y/%m/%d %H:%M:%S.%f')
 			diff = peak_dt-primary_dt
