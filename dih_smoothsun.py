@@ -762,7 +762,18 @@ def dih_sun_shared_plot(file_string,savename,newname,first_time,test):
 
 #
 #
+#Name: dih_sun_recurs_shared_plot
 #
+#
+#Purpose: recurses over all the data in metadatafile and performs dih_sun_shared_plot
+#
+#Inputs: metadatafile created by dih_sun_recurs_data_plot, ubersavestring, newsavestring, test = 1 or 0
+#
+#Outputs: shared plots
+#
+#Example: gah = dih_sun_recurs_shared_plot('all_meta.txt','uber','test1',1)
+#
+#Written: 7/10/14 Dan Herman daniel.herman@cfa.harvard.edu
 #
 def dih_sun_recurs_shared_plot(metadatafile,savename,newname,test):
 	shared_times = dih_shared_groups(metadatafile)
