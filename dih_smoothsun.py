@@ -1,5 +1,6 @@
 #Name: dih_smoothsun
 #
+#Collection of plotting programs 
 
 import sys
 import numpy as np
