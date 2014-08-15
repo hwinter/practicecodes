@@ -9,7 +9,7 @@ import os.path
 #
 #Name: dih_get_outliers
 #
-#
+#Purpose: finds outliers in hist data
 def dih_get_outliers(filename):
 	file = open(filename,'r')
 	line = file.readlines()
@@ -22,7 +22,7 @@ def dih_get_outliers(filename):
 #
 #Name: dih_find_event
 #
-#
+#Must rewrite this!
 def dih_find_event(timestring,filename):
 	file = open(filename,'r')
 	line = file.readlines()
@@ -36,7 +36,7 @@ def dih_find_event(timestring,filename):
 #
 #Name: dih_track_george
 #
-#
+#Purpose: finds ivo files in george with no sav file
 def dih_track_george(num):
 	if num < 1000:
 		files = glob.glob('/data/george/hwinter/data/Flare_Detective_Data/Event_Stacks/Working/ivo*')
