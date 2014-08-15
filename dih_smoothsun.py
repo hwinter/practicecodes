@@ -39,7 +39,7 @@ from scipy.io.idl import readsav
 import dih_fft_fcm as fcm
 from dih_goes_csv_reader import dih_goes_csv_checker_event_files
 
-##
+## Key for sorting
 def getKey(item):
 	return item[0]
 #see dih_smoothie for documentation for dih_smooth module
@@ -824,6 +824,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuelist):
     	#cue_file = open(cuename,'r')
     	#cue_lines = cue_file.readlines()
     for idx,dirpath in enumerate(fits_list):
+    	#set indexing 
     	if idx < 776 or idx == 2539 or idx == 1521:
     		continue
     	member_fits = glob.glob(dirpath + '/*.fits')
@@ -850,6 +851,7 @@ def dih_sun_cropped_plotter(dirname,savename,cuelist):
     		no_sav_file.write('\n')
     		no_sav_file.close()
     		continue
+    	#get event file
     	ev = readsav(ivo_list[idx]+'/'+ivo_string+'.sav')
     	bounding_box = fcm.dih_get_event_bounding_box(ev)
     	ev_peak_time = fcm.dih_get_event_peak_time(ev)
