@@ -151,29 +151,32 @@ def dih_sun_recurs_goes_plot(file_131,savename):
 	meta_lines = data_file.readlines()
 	uber_goes_metadatalist = []
 	for member in meta_lines:
-		member = ast.literal_eval(member)
-		start_time = datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')
-		end_time = datetime.strptime(member[-1],'%Y-%m-%dT%H:%M:%S.%f')
-		month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-		start_month = month_list[start_time.month - 1]
-		end_month = month_list[end_time.month - 1]
-		start_string = datetime.strftime(start_time,'%d-'+start_month+'-%Y %H:%M:%S.%f')
-		end_string = datetime.strftime(end_time,'%d-'+end_month+'-%Y %H:%M:%S.%f')
-		columns = dih_run_idl_goes_script(start_string,end_string,'/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt')
-		if columns == 11:
+		try:
+			member = ast.literal_eval(member)
+			start_time = datetime.strptime(member[0],'%Y-%m-%dT%H:%M:%S.%f')
+			end_time = datetime.strptime(member[-1],'%Y-%m-%dT%H:%M:%S.%f')
+			month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+			start_month = month_list[start_time.month - 1]
+			end_month = month_list[end_time.month - 1]
+			start_string = datetime.strftime(start_time,'%d-'+start_month+'-%Y %H:%M:%S.%f')
+			end_string = datetime.strftime(end_time,'%d-'+end_month+'-%Y %H:%M:%S.%f')
+			columns = dih_run_idl_goes_script(start_string,end_string,'/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt')
+			if columns == 11:
+				continue
+			with open('/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt','r') as f:
+				first_line = [f.readline()]
+				real_first_time = dih_create_goes_times(first_line)[0]
+			list_goes = dih_sun_data_goes_plot(columns,real_first_time,savename)
+			if list_goes == 11:
+				continue
+			metadatalist = list_goes[0]
+			meta_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_131_goes.txt','a')
+			meta_file.write(str([member,metadatalist,list_goes[1],list(list_goes[2])]))
+			meta_file.write('\n')
+			meta_file.close()
+			uber_goes_metadatalist.append(metadatalist)
+		except ValueError:
 			continue
-		with open('/data/george/dherman/metadata/' + savename + '_goes_curve_' + member[0] + '.txt','r') as f:
-			first_line = [f.readline()]
-			real_first_time = dih_create_goes_times(first_line)[0]
-		list_goes = dih_sun_data_goes_plot(columns,real_first_time,savename)
-		if list_goes == 11:
-			continue
-		metadatalist = list_goes[0]
-		meta_file = open('/data/george/dherman/metadata/' + savename + '_all_human_meta_131_goes.txt','a')
-		meta_file.write(str([member,metadatalist,list_goes[1],list(list_goes[2])]))
-		meta_file.write('\n')
-		meta_file.close()
-		uber_goes_metadatalist.append(metadatalist)
 	return uber_goes_metadatalist
 #
 #
